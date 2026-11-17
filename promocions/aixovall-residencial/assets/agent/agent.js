@@ -70,7 +70,7 @@ document.addEventListener('click', e => {
 /* ---------- accés ---------- */
 function login(msg){
   sheet(`<div class="sh-h"><h2>Accés agents iShowi</h2></div><p class="sub">Entra amb el teu usuari de l’iShowi Hub per veure l’estat real dels habitatges i aparaular, reservar o pujar documents.</p>
-  ${msg ? `<p class="ag-err">${esc(msg)}</p>` : ''}
+  ${msg ? `<p class="ag-err">${esc(msg)}</p>` : ''}${B.hub ? '' : '<p class="ag-warn">L’accés encara no està connectat amb l’iShowi Hub d’aquesta promoció. Ho activa BoomBizz.</p>'}
   <form class="ag-f" id="ag-login"><label>Usuari o correu<input name="usuario" autocomplete="username" required></label><label>Contrasenya<input name="clave" type="password" autocomplete="current-password" required></label>
   <button class="btn wood" type="submit">Entrar</button></form>
   ${B.google ? `<div class="ag-or"><span>o bé</span></div><a class="btn ghost ag-g" href="${esc(B.google)}"><svg viewBox="0 0 48 48" width="18" height="18" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9 3.6l6.7-6.7C35.6 2.5 30.2 0 24 0 14.6 0 6.6 5.4 2.7 13.2l7.8 6.1C12.4 13.6 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.1 24.6c0-1.6-.1-3.1-.4-4.6H24v9h12.4c-.5 2.9-2.2 5.3-4.6 6.9l7.4 5.8c4.3-4 6.9-9.9 6.9-17.1z"/><path fill="#FBBC05" d="M10.5 28.7A14.5 14.5 0 0 1 9.5 24c0-1.6.3-3.2.9-4.7l-7.8-6.1A24 24 0 0 0 0 24c0 3.9.9 7.5 2.6 10.8l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.4-5.8c-2.1 1.4-4.8 2.2-8.5 2.2-6.3 0-11.6-4.2-13.5-9.9l-7.9 6.1C6.6 42.6 14.6 48 24 48z"/></svg>Entrar amb Google</a>` : ''}
@@ -223,5 +223,5 @@ if (err){
   history.replaceState(null, '', location.pathname + location.hash); setTimeout(() => login(M[err] || 'No s’ha pogut entrar amb Google.'), 600);
 }
 menu();
-if (/(?:^|;\s*)axr_ag_on=1/.test(document.cookie)) load().then(s => { if (s && /habitatges/.test(location.hash)) toast('Mode agent actiu · ' + s.actor.nombre); });
+if (B.hub && /(?:^|;\s*)axr_ag_on=1/.test(document.cookie)) load().then(s => { if (s && /habitatges/.test(location.hash)) toast('Mode agent actiu · ' + s.actor.nombre); });
 })();

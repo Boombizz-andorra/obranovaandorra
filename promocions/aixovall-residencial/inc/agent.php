@@ -512,7 +512,8 @@ function axr_ag_api_contract( WP_REST_Request $req ) {
 
 function axr_ag_boot( $lang ) {
 	return array(
-		'on'     => axr_ag_activo(),
+		'on'     => true,
+		'hub'    => axr_ag_activo(), // sense enllaç amb el Hub, l'accés es veu però avisa que encara no està connectat
 		'rest'   => esc_url_raw( rest_url( 'axr/v1/agent/' ) ),
 		'google' => axr_ag_activo() ? axr_ag_google_url( $lang ) : '',
 		'lang'   => $lang,
@@ -521,7 +522,6 @@ function axr_ag_boot( $lang ) {
 
 /** S'imprimeix al final del showroom (templates/showroom.php). */
 function axr_agent_assets( $lang ) {
-	if ( ! axr_ag_activo() ) { return; }
 	echo '<script>window.AXA_BOOT=' . wp_json_encode( axr_ag_boot( $lang ), JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP ) . ';</script>' . "\n";
 	echo '<link rel="stylesheet" href="' . esc_url( AXR_URL . 'assets/agent/agent.css?v=' . axr_ver( 'agent/agent.css' ) ) . '">' . "\n";
 	echo '<script src="' . esc_url( AXR_URL . 'assets/agent/agent.js?v=' . axr_ver( 'agent/agent.js' ) ) . '"></script>' . "\n";
