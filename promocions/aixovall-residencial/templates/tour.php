@@ -57,7 +57,11 @@ nav button.on{background:#fff;color:#111;font-weight:600}
 #load{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;pointer-events:none}
 #load .bar{width:180px;height:3px;background:rgba(255,255,255,.2);border-radius:3px;overflow:hidden}#load .bar i{display:block;height:100%;width:0;background:#fff;transition:width .2s}
 #help{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);background:rgba(17,17,17,.72);padding:12px 18px;border-radius:12px;text-align:center;pointer-events:none;transition:opacity .6s}
+#gyro[hidden]{display:none}#gyro.on{background:#fff;color:#111}
 @media (max-width:700px){#map{width:130px;top:62px}#note{display:none}.ttl small{display:none}nav button{height:34px;padding:0 11px;font-size:13px}}
+/* mòbil en horitzontal: la vista ocupa tota la pantalla, estances en una sola fila desplaçable i minimapa petit */
+@media (orientation:landscape) and (max-height:520px){header{left:max(12px,env(safe-area-inset-left));right:max(12px,env(safe-area-inset-right));top:8px}.pill{height:38px}.pill.round{width:38px}#map{width:120px;top:54px;right:max(12px,env(safe-area-inset-right));padding:6px}#note{display:none}.ttl small{display:block}
+ nav{bottom:max(6px,env(safe-area-inset-bottom));flex-wrap:nowrap;justify-content:flex-start;overflow-x:auto;scrollbar-width:none;pointer-events:auto;padding:0 max(12px,env(safe-area-inset-left))}nav::-webkit-scrollbar{display:none}nav button{flex:none;height:32px;padding:0 11px;font-size:13px}nav:before,nav:after{content:'';margin:auto}}
 </style>
 </head>
 <body>
@@ -68,6 +72,7 @@ nav button.on{background:#fff;color:#111;font-weight:600}
 <header>
 	<a class="pill round" href="<?php echo esc_url( $tt_back ); ?>" id="back" aria-label="Tornar a la web" title="Tornar a la web"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></a>
 	<div class="ttl"><b><?php echo esc_html( $tt_title ); ?></b><small id="room"></small></div>
+	<button class="pill round" id="gyro" hidden aria-pressed="false" aria-label="Mirar movent el telèfon" title="Mirar movent el telèfon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="5" width="8" height="14" rx="1.6"/><path d="M3.5 9.5a8 8 0 0 0 0 5M20.5 9.5a8 8 0 0 1 0 5"/></svg></button>
 	<button class="pill round" id="fs" aria-label="Pantalla completa" title="Pantalla completa"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
 </header>
 <div id="map" aria-label="Minimapa"></div>
@@ -127,13 +132,31 @@ function cone(){ if (!cur || !map.X) return; const cx = map.X(cur.pos[0]), cy = 
   const pt = t => [cx + Math.sin(t) * r, cy - Math.cos(t) * r]; const p1 = pt(yaw - Math.min(a, 1.2)), p2 = pt(yaw + Math.min(a, 1.2));
   $('#cone').setAttribute('d', `M${cx},${cy}L${p1[0].toFixed(1)},${p1[1].toFixed(1)}A${r},${r} 0 0 1 ${p2[0].toFixed(1)},${p2[1].toFixed(1)}Z`); }
 
+/* ---------- mirar movent el telèfon (giroscopi) ---------- */
+const gy = {on:false, dev:null, off:0};
+function setYaw(v){ yaw = v; if (gy.on && gy.dev != null) gy.off = v - gy.dev; }
+function onOri(e){ if (!gy.on || e.alpha == null || e.beta == null) return; const R = Math.PI / 180, a = e.alpha * R, b = e.beta * R, g = (e.gamma || 0) * R;
+  const sA = Math.sin(a), cA = Math.cos(a), sB = Math.sin(b), cB = Math.cos(b), sG = Math.sin(g), cG = Math.cos(g);
+  /* cap on apunta la càmera del darrere (eix −Z del dispositiu) en coordenades del món: val igual en vertical i en horitzontal */
+  const x = -(cA * sG + sA * sB * cG), y = -(sA * sG - cA * sB * cG), z = -(cB * cG);
+  const dv = Math.atan2(x, y), pv = Math.asin(Math.max(-1, Math.min(1, z)));
+  if (gy.dev == null) gy.off = yaw - dv; // en activar-lo, la vista no salta
+  gy.dev = dv; yaw = dv + gy.off; pitch = Math.max(-1.45, Math.min(1.45, pv)); dirty = true; }
+function gyro(on){ gy.on = on; gy.dev = null; const b = $('#gyro'); b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on));
+  if (on) addEventListener('deviceorientation', onOri); else removeEventListener('deviceorientation', onOri); }
+const DOE = window.DeviceOrientationEvent;
+if (DOE && (matchMedia('(pointer:coarse)').matches || 'ontouchstart' in window)){ $('#gyro').hidden = false; $('#help').textContent = 'Arrossega per mirar · Toca els cercles per moure’t · Activa el mòbil per mirar movent-lo';
+  $('#gyro').onclick = async () => { if (gy.on) return gyro(false);
+    try { if (typeof DOE.requestPermission === 'function'){ const r = await DOE.requestPermission(); if (r !== 'granted'){ const h = $('#help'); h.textContent = 'Cal permetre l’accés al moviment del telèfon'; h.style.opacity = 1; setTimeout(() => h.style.opacity = 0, 3500); return; } } } catch(e){ return; }
+    gyro(true); setTimeout(() => { if (gy.on && gy.dev == null){ gyro(false); const h = $('#help'); h.textContent = 'Aquest dispositiu no té sensor de moviment'; h.style.opacity = 1; setTimeout(() => h.style.opacity = 0, 3500); } }, 1500); }; }
+addEventListener('orientationchange', () => setTimeout(resize, 250));
 let busy = false;
 async function go(id, first){ if (busy || (cur && cur.id === id)) return; busy = true; const s = byId(id);
   if (!first){ $('#fade').style.opacity = 1; }
   let im; try { im = await load(id, f => { $('#lb').style.width = Math.round(f * 100) + '%'; }); } catch(e){ $('#lt').textContent = 'No s’ha pogut carregar la imatge.'; busy = false; return; }
   if (!first) await new Promise(r => setTimeout(r, 260));
   /* en entrar a una estança, mirem en la direcció del moviment (com Matterport) */
-  if (cur && !first){ yaw = Math.atan2(s.pos[0] - cur.pos[0], s.pos[1] - cur.pos[1]); } else if (s.yaw != null) yaw = s.yaw;
+  if (cur && !first){ setYaw(Math.atan2(s.pos[0] - cur.pos[0], s.pos[1] - cur.pos[1])); } else if (s.yaw != null) setYaw(s.yaw);
   if (s.pitch != null && first) pitch = s.pitch;
   gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, im);
   cur = s; $('#room').textContent = s.label; document.title = s.label + ' · ' + T.title + ' · Aixovall Residencial';
@@ -152,6 +175,7 @@ cv.addEventListener('pointerdown', e => { cv.setPointerCapture(e.pointerId); pts
 cv.addEventListener('pointermove', e => { if (!pts.has(e.pointerId)) return; pts.set(e.pointerId, [e.clientX, e.clientY]);
   if (pts.size === 2){ const [a, b] = [...pts.values()]; const d = Math.hypot(a[0] - b[0], a[1] - b[1]); if (pinch) zoom(pinch / d); pinch = d; return; }
   const [, ty] = tans(); const k = 2 * ty / H; const dx = e.clientX - lx, dy = e.clientY - ly; lx = e.clientX; ly = e.clientY; moved += Math.abs(dx) + Math.abs(dy);
+  if (gy.on && gy.dev != null){ gy.off -= dx * k; yaw = gy.dev + gy.off; dirty = true; return; } // amb el moviment actiu, el dit només gira a dreta i esquerra
   yaw -= dx * k; pitch = Math.max(-1.45, Math.min(1.45, pitch + dy * k)); dirty = true; });
 const up = e => { pts.delete(e.pointerId); if (pts.size < 2) pinch = 0; if (!pts.size) cv.classList.remove('drag'); };
 cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
