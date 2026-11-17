@@ -60,3 +60,7 @@ body.ag-on #b-menu::after{content:"";position:absolute;top:6px;right:6px;width:9
 #ag-cfg-bar{position:fixed;left:50%;bottom:86px;transform:translateX(-50%);z-index:60;display:flex;gap:8px;align-items:center;background:#1c201d;color:#fff;padding:8px 8px 8px 16px;border-radius:999px;box-shadow:0 10px 30px rgba(0,0,0,.25);font:600 13px system-ui,sans-serif;max-width:calc(100vw - 24px)}
 #ag-cfg-bar button{border:0;border-radius:999px;padding:9px 14px;font:600 13px system-ui,sans-serif;background:#b4783f;color:#fff;cursor:pointer;white-space:nowrap}
 #ag-cfg-bar span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* Mode agent: fora els contactes al públic (WhatsApp, correu, formulari i secció Contacte). Sense sessió, tot es manté igual. */
+body.ag-on a[href*="wa.me"],body.ag-on a[href^="mailto:"],body.ag-on a[href="#contacte"],body.ag-on a[href$="#contacte"],
+body.ag-on #m-nav [data-s="contacte"],body.ag-on #s-contacte,body.ag-on #m-share+*:empty{display:none!important}
+body.ag-on .axc-wa,body.ag-on #gate,body.ag-on .gate-form,body.ag-on [data-place="dossier"].axc-wa{display:none!important}

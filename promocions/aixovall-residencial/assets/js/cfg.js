@@ -519,7 +519,7 @@ async function dossierCtx() {
     rooms, annex, mods: S.mods && S.mods.items && S.mods.items.length ? { items: S.mods.items.map(i => ({ label: i.label, qty: modQty(i), amount: i.amount })), total: S.mods.total, kitchen: !!S.mods.kitchen } : null, proposal: S.propuesta.trim(),
     totals: { home: HOME.price, anx: totalAnx(), cfg: totalCfg() },
     pay: { base: PP.base, start: tr('cal_start'), end: tr('cal_end'), rows: PP.rows.map(r => ({ n: r.n, label: tr(r.k), sub: tr(r.s), amount: r.amount })) },
-    contact: { wa: API_WA, waText: gt('d_wa_msg', { name: (lead.n || '').split(' ')[0], home: HOME.name, code, total: eur(grandIgi()) }), phone: A.phone, email: A.email || 'apimi@andorra.ad', web: 'apimi.com/aixovall-residencial' },
+    contact: { wa: API_WA, waText: gt('d_wa_msg', { name: (lead.n || '').split(' ')[0], home: HOME.name, code, total: eur(grandIgi()) }), phone: A.phone, email: A.email || 'carles@apimi.com', web: 'obranovaandorra.com/aixovall-residencial' },
     company: { promotor: 'Construccions Estapé', arch: 'Magnesi Arquitectes', agency: 'API Immobiliària' }
   };
 }
@@ -1506,14 +1506,16 @@ if (form) {
     acts.append(wa);
     if (!AXR.lead) {
       const m = document.createElement('a'); m.className = 'ax-lead-mail';
-      m.href = 'mailto:apimi@andorra.ad?subject=' + encodeURIComponent(T.f_subject) + '&body=' + encodeURIComponent(text);
-      m.textContent = T.f_mail + ' · apimi@andorra.ad';
+      m.href = 'mailto:carles@apimi.com?subject=' + encodeURIComponent(T.f_subject) + '&body=' + encodeURIComponent(text);
+      m.textContent = T.f_mail + ' · carles@apimi.com';
       acts.append(m);
     }
     msg.append(p, acts);
   });
 }
 /* v4.1 · mode agent: estat actual per desar-lo com a configuració provisional al Hub (assets/agent/agent-cfg.js) */
+/* Agent del Hub amb sessió: sense formulari de contacte ni enviament de sol·licitud (com l'administrador); el dossier es genera directament. */
+A.setAgent = () => { ADMIN_PDF = true; leadSent = true; document.body.classList.add('ag-on'); try { if (STEPS[S.paso].id === 'resumen') renderSummary(); } catch (e) {} };
 A.agentState = () => ({
   lines: KEYS.filter(k => !grp(k).annex).map(k => { const o = op(k); return { key: k, codigo: o.id, nombre: optName(o), importe: amount(k), inclos: isNone(o) || amount(k) === 0 }; }),
   plaza: S.plaza || '', mods: S.mods ? { total: modsTotal() } : null, total: totalCfg(), enlace: shareUrl()

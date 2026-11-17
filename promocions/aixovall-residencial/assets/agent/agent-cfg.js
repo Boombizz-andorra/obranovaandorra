@@ -7,6 +7,7 @@ const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&a
 const say = t => { const el = document.getElementById('ag-cfg-msg'); if (el) el.textContent = t; };
 fetch(B.rest + 'estat', { credentials: 'same-origin', headers: H }).then(r => r.ok ? r.json() : null).then(S => {
   if (!S || !S.ok) return;
+  const ag = () => window.AXC && AXC.setAgent ? AXC.setAgent() : setTimeout(ag, 300); ag(); // mode agent: fora contacte i formulari
   const v = S.viviendas.find(x => x.referencia === B.home); if (!v) return;
   const bar = document.createElement('div'); bar.id = 'ag-cfg-bar';
   if (!v.mia){ bar.innerHTML = `<span id="ag-cfg-msg">Mode agent · aparaula o reserva aquest pis per desar-ne la configuració</span>`; document.body.appendChild(bar); return; }

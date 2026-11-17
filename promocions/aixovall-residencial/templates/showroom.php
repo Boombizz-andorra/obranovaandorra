@@ -311,7 +311,7 @@ axr_head_common( $lang, $axs_t, $axs_d ); ?>
         <p id="cout" class="note" hidden></p>
       </form>
       <div class="box"><h2>Qui hi ha darrere</h2>
-        <ul class="pay"><li><span>Comercialitza<small>WhatsApp i telèfon +376 822345 · apimi@andorra.ad</small></span><b>API Immobiliària</b></li><li><span>Promotor</span><b>Construccions Estapé</b></li><li><span>Arquitectura</span><b>Magnesi Arquitectes</b></li></ul>
+        <ul class="pay"><li><span>Comercialitza<small>WhatsApp i telèfon +376 822345 · carles@apimi.com</small></span><b>API Immobiliària</b></li><li><span>Promotor</span><b>Construccions Estapé</b></li><li><span>Arquitectura</span><b>Magnesi Arquitectes</b></li></ul>
         <p class="note">Showroom i configurador: iShowi, de BoomBizz Solucions Comercials.</p></div>
     </div>
   </div></div></section>

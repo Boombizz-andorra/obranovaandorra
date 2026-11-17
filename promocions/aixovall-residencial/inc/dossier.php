@@ -91,7 +91,7 @@ function axr_rest_dossier( $request ) {
 function axr_dossier_notify( $payload ) {
 	$c = axr_dossier_cfg();
 	if ( empty( $c['on'] ) || '' === trim( (string) $c['webhook'] ) || ! wp_http_validate_url( $c['webhook'] ) ) { return false; }
-	$payload['source']  = 'apimi.com/aixovall-residencial';
+	$payload['source']  = 'obranovaandorra.com/aixovall-residencial';
 	$payload['version'] = AXR_VERSION;
 	$headers = array( 'Content-Type' => 'application/json; charset=utf-8' );
 	if ( '' !== (string) $c['secret'] ) { $headers['x-make-apikey'] = (string) $c['secret']; }

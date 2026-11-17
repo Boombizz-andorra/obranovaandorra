@@ -44,6 +44,7 @@ function paint(){
     R.rerender && R.rerender();
   }
   menu();
+  if (S && /^#contacte/.test(location.hash)) location.hash = 'habitatges';
   const ub = $('#ag-u'); if (ub) ub.hidden = !S;
 }
 const viv = ref => S && S.viviendas.find(v => v.referencia === ref);
@@ -215,6 +216,9 @@ window.AXA = {
   sheet(h){ if (!S) return ''; const v = viv(h.id); if (!v) return ''; return `<div class="ag-sheet-cta"><button class="btn ag-btn" data-ag-unit="${esc(h.id)}">${v.mia ? 'Gestionar la meva unitat' : v.fase === 'disponible' ? 'Aparaular o reservar' : 'Estat: ' + esc(FTXT[v.fase])}</button></div>`; },
   state: () => S, reload: load,
 };
+
+/* En mode agent no hi ha secció de contacte: si s'hi arriba per enllaç, va als habitatges. */
+addEventListener('hashchange', () => { if (S && /^#contacte/.test(location.hash)) location.hash = 'habitatges'; });
 
 /* inici */
 const q = new URLSearchParams(location.search), err = q.get('agerr');

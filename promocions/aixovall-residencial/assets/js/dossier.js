@@ -17,7 +17,7 @@
      proposal: '',
      totals:{ home, anx, cfg },
      pay:   { base, rows:[ { label, sub, n, amount } ], start, end },
-     contact:{ wa: '376822345', waText: 'Hola…', phone: '+376 822345', email: 'apimi@andorra.ad', web: 'apimi.com/aixovall-residencial' },
+     contact:{ wa: '376822345', waText: 'Hola…', phone: '+376 822345', email: 'carles@apimi.com', web: 'obranovaandorra.com/aixovall-residencial' },
      company:{ promotor:'Construccions Estapé', arch:'Magnesi Arquitectes', agency:'API Immobiliària' }
    }
    build(ctx) → jsPDF doc.  */

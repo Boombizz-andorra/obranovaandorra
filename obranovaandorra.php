@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Obra Nova Andorra
  * Description: Web de les promocions d'obra nova de BoomBizz a Andorra (obranovaandorra.com). Cada promoció és un mòdul a promocions/<slug>/ amb el seu showroom, el seu configurador i la seva connexió a l'iShowi Hub.
- * Version: 1.1.0
+ * Version: 1.1.2
  * Requires at least: 6.0
  * Requires PHP: 7.4
  * Author: BoomBizz Solucions Comercials
@@ -10,7 +10,7 @@
  */
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
-define( 'ONA_VERSION', '1.1.0' );
+define( 'ONA_VERSION', '1.1.2' );
 define( 'ONA_DIR', plugin_dir_path( __FILE__ ) );
 
 /* Promocions actives. Cada una carrega el seu fitxer principal i funciona com un plugin independent
