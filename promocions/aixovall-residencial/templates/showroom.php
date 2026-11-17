@@ -348,5 +348,6 @@ axr_head_common( $lang, $axs_t, $axs_d ); ?>
 <script>window.AXS=<?php echo wp_json_encode( $axs_boot, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP ); ?>;</script>
 <script src="<?php echo esc_url( $axs_base . 'i18n.js?v=' . axr_ver( 'sr/i18n.js' ) ); ?>"></script>
 <script src="<?php echo esc_url( $axs_base . 'showroom.js?v=' . axr_ver( 'sr/showroom.js' ) ); ?>"></script>
+<?php if ( function_exists( 'axr_agent_assets' ) ) { axr_agent_assets( $lang ); } ?>
 </body>
 </html>

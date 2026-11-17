@@ -1513,4 +1513,9 @@ if (form) {
     msg.append(p, acts);
   });
 }
+/* v4.1 · mode agent: estat actual per desar-lo com a configuració provisional al Hub (assets/agent/agent-cfg.js) */
+A.agentState = () => ({
+  lines: KEYS.filter(k => !grp(k).annex).map(k => { const o = op(k); return { key: k, codigo: o.id, nombre: optName(o), importe: amount(k), inclos: isNone(o) || amount(k) === 0 }; }),
+  plaza: S.plaza || '', mods: S.mods ? { total: modsTotal() } : null, total: totalCfg(), enlace: shareUrl()
+});
 })();

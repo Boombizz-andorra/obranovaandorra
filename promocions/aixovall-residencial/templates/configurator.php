@@ -73,5 +73,6 @@ $ax_track = array( 'pixel' => '2355120198569529', 'ga4' => '', 'capi' => '' );
 ?>
 <script>window.AXH=<?php echo wp_json_encode( array( 'homes' => $ax_hl, 't' => $ax_ht ), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP ); ?>;window.AXTRACK=<?php echo wp_json_encode( $ax_track, JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP ); ?>;</script>
 <script src="<?php echo esc_url( AXR_URL . 'assets/js/cfg.js?v=' . axr_ver( 'js/cfg.js' ) ); ?>" defer></script>
+<?php if ( function_exists( 'axr_agent_cfg_assets' ) ) { axr_agent_cfg_assets( $home ); } ?>
 </body>
 </html>

@@ -37,7 +37,7 @@ js = patch(js, "const IGI = 4.5, PHONE = '376822345';", "const IGI = (window.AXS
 js = patch(js, "const ST = {available:'Disponible',reserved:'Reservat',sold:'Venut'};",
     "const ST = Object.assign({available:'Disponible',agreed:'Aparaulat',reserved:'Reserva tècnica',confirmed:'Reserva confirmada',sold:'Venut'}, (window.AXS && AXS.st) || {});\n"
     "const stc = s => s === 'available' ? '' : s === 'confirmed' ? 'reserved' : s; // classe visual de cada estat\n"
-    "const pv = (h, v) => h.price == null ? '—' : h.status === 'agreed' ? `<span class=\"pblur\" title=\"${ST.agreed}\">${eur(v)}</span>` : eur(v); // preu només si el Hub el deixa veure; aparaulat, difuminat com a la pàgina actual", 'estats')
+    "const pv = (h, v) => h.price == null ? '—' : h.status === 'agreed' && !document.body.classList.contains('ag-on') ? `<span class=\"pblur\" title=\"${ST.agreed}\">${eur(v)}</span>` : eur(v); // preu només si el Hub el deixa veure; aparaulat, difuminat com a la pàgina actual", 'estats')
 js = patch(js, "h.status === 'available' ? '' : h.status", "stc(h.status)", 'classe estat (llistes)', count=2)
 js = patch(js, 'class="unit ${h.status}"', 'class="unit ${stc(h.status)}"', 'classe estat (plànol)')
 js = re.sub(r"eur\(h\.price([^()]*(?:\([^()]*\))?[^()]*)\)", lambda m: f"pv(h, h.price{m.group(1)})", js)
@@ -95,6 +95,14 @@ css += """
 """
 # missatge del formulari de contacte en l'idioma de la pàgina
 js = patch(js, "`Hola, soc ${n}. ${m || 'M’interessa Aixovall Residencial.'}`", "`${(window.axsTr || (t => t))('Hola, soc')} ${n}. ${m || (window.axsTr || (t => t))('M’interessa Aixovall Residencial.')}`", 'missatge de contacte traduït')
+js = patch(js, "$('#u-price').textContent = pv(h, h.price);", "$('#u-price').innerHTML = pv(h, h.price);", 'preu de la fitxa amb format (aparaulat difuminat)')
+# ---------- v4.1: ganxos per al mode agent (assets/agent/agent.js) ----------
+js = patch(js, "  $('#u-cfg').hidden = !cfgOK(h); }", "  $('#u-cfg').hidden = !cfgOK(h); window.AXA && AXA.unit && AXA.unit(h); }", 'ganxo agent a la fitxa del pis')
+js = patch(js, '<span class="btn" style="opacity:.45">Configurador aviat</span>`}</div>`; }', '<span class="btn" style="opacity:.45">Configurador aviat</span>`}</div>${window.AXA && AXA.sheet ? AXA.sheet(h) : \'\'}`; }', 'ganxo agent al full del pis')
+js = patch(js, "addEventListener('hashchange', go); go();\n})();",
+    "window.AXSR = { HOMES, byId, openSheet, closeSheet, toast, badge, ST, closeMenu: () => setMenu(false), get route(){ return route; }, get uHome(){ return uHome; },\n"
+    "  rerender(){ try { if (route && route.s === 'pis' && uHome) uRender(uHome, uTab); hRender(); if (route && route.s === 'planta') pRender(pFloor); } catch(e){} } };\n"
+    "addEventListener('hashchange', go); go();\n})();", 'interfície per al mode agent')
 (ROOT / 'assets/sr/showroom.css').write_text(css, encoding='utf-8')
 (ROOT / 'assets/sr/showroom.js').write_text(js, encoding='utf-8')
 tpl = """<?php
@@ -166,6 +174,7 @@ axr_head_common( $lang, $axs_t, $axs_d ); ?>
 <script>window.AXS=<?php echo wp_json_encode( $axs_boot, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP ); ?>;</script>
 <script src="<?php echo esc_url( $axs_base . 'i18n.js?v=' . axr_ver( 'sr/i18n.js' ) ); ?>"></script>
 <script src="<?php echo esc_url( $axs_base . 'showroom.js?v=' . axr_ver( 'sr/showroom.js' ) ); ?>"></script>
+<?php if ( function_exists( 'axr_agent_assets' ) ) { axr_agent_assets( $lang ); } ?>
 </body>
 </html>
 """

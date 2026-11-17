@@ -1,0 +1,62 @@
+/* Aixovall Residencial · mode agent iShowi */
+#ag-menu{padding:6px 16px 10px;border-top:1px solid var(--line,#e4ddd0);margin-top:4px;display:flex;flex-direction:column;gap:2px}
+.ag-mlink{display:flex;align-items:center;gap:10px;width:100%;padding:10px 6px;border:0;background:none;font:600 14px var(--f,system-ui);color:var(--ink,#1c201d);text-align:left;cursor:pointer;border-radius:12px}
+.ag-mlink:hover{background:rgba(28,32,29,.06)}
+.ag-mlink.sub{font-weight:500;font-size:13px;color:var(--mute,#7d857f)}
+.ag-i{width:18px;height:18px;flex:none}
+.ag-who{display:flex;flex-direction:column;padding:8px 6px 6px}
+.ag-who b{font:700 11px var(--f,system-ui);letter-spacing:.12em;text-transform:uppercase;color:var(--wood,#b4783f)}
+.ag-who span{font-weight:600}.ag-who small{color:var(--mute,#7d857f)}
+body.ag-on #b-menu::after{content:"";position:absolute;top:6px;right:6px;width:9px;height:9px;border-radius:50%;background:var(--wood,#b4783f);box-shadow:0 0 0 2px #fff}
+.ag-btn{background:var(--wood-d,#8c5a2b)!important;color:#fff}
+.ag-sheet-cta{margin-top:10px}.ag-sheet-cta .btn{width:100%}
+
+.ag .sub{margin-bottom:10px}
+.ag h3{font:600 15px var(--fh,system-ui);margin:16px 0 6px}
+.ag-st{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font:600 11.5px var(--f,system-ui);background:#eee;color:#333;white-space:nowrap}
+.ag-st::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.ag-disponible{background:#e6f4ec;color:#1f7a45}.ag-aparaulat{background:#fdf1dd;color:#a5650c}.ag-reserva_tecnica,.ag-reserva_confirmada{background:#fbe9d0;color:#b06208}.ag-vendida{background:#f7e2df;color:#a8382e}
+.ag-f{display:flex;flex-direction:column;gap:10px;margin:8px 0}
+.ag-f label{display:flex;flex-direction:column;gap:4px;font:600 12.5px var(--f,system-ui);color:var(--ink2,#4c534e)}
+.ag-f input,.ag-f select{font:500 15px var(--f,system-ui);padding:11px 12px;border-radius:12px;border:1.5px solid var(--line,#e4ddd0);background:#fff;color:var(--ink,#1c201d);width:100%;box-sizing:border-box}
+.ag-f input:focus,.ag-f select:focus{outline:2px solid var(--wood,#b4783f);outline-offset:1px}
+.ag-f .btn{margin-top:4px}
+.ag-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:520px){.ag-2{grid-template-columns:1fr}}
+.ag-f details{border:1.5px dashed var(--line,#e4ddd0);border-radius:14px;padding:8px 12px}
+.ag-f details[open]{display:flex;flex-direction:column;gap:8px}
+.ag-f summary{cursor:pointer;font:600 13px var(--f,system-ui)}
+.ag-or{display:flex;align-items:center;gap:10px;margin:12px 0;color:var(--mute,#7d857f);font-size:12px}
+.ag-or::before,.ag-or::after{content:"";flex:1;height:1px;background:var(--line,#e4ddd0)}
+.ag-g{gap:10px}
+.ag-err{background:#fbe7e4;color:#9d2f25;padding:10px 12px;border-radius:12px;font-size:14px}
+.ag-warn{background:#fdf1dd;color:#7d4a07;padding:10px 12px;border-radius:12px;font-size:13.5px}
+.ag-box-note{background:rgba(28,32,29,.05);padding:12px 14px;border-radius:14px}
+.ag-acts{display:flex;flex-direction:column;gap:8px;margin:12px 0}
+.ag-acts.two{display:grid;grid-template-columns:1fr 1fr}
+.ag-tabs{display:flex;gap:4px;overflow-x:auto;margin:6px -4px 12px;padding:0 4px 2px;scrollbar-width:none}
+.ag-tabs button{flex:none;border:0;padding:8px 13px;border-radius:999px;background:rgba(28,32,29,.06);font:600 13px var(--f,system-ui);color:var(--ink,#1c201d);cursor:pointer}
+.ag-tabs button.on{background:var(--ink,#1c201d);color:#fff}
+.ag-dl{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px;margin:0 0 6px}
+.ag-dl div{background:rgba(28,32,29,.04);border-radius:12px;padding:9px 11px}
+.ag-dl dt{font:600 11px var(--f,system-ui);text-transform:uppercase;letter-spacing:.06em;color:var(--mute,#7d857f)}
+.ag-dl dd{margin:2px 0 0;font-weight:600}.ag-dl small{display:block;font-weight:500;font-size:12px;color:var(--mute,#7d857f)}
+.ag-list,.ag-files,.ag-docs,.ag-lines{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.ag-list button{width:100%;display:grid;grid-template-columns:1fr auto;gap:2px 10px;align-items:center;text-align:left;border:0;background:rgba(28,32,29,.05);padding:10px 12px;border-radius:14px;cursor:pointer;font:inherit;color:inherit}
+.ag-list small{grid-column:1/-1;color:var(--mute,#7d857f)}
+.ag-files a,.ag-docs a{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:14px;background:rgba(28,32,29,.05);text-decoration:none;color:inherit}
+.ag-files span,.ag-docs span{flex:1;display:flex;flex-direction:column;font-weight:600}
+.ag-files small,.ag-docs small{color:var(--mute,#7d857f);font-weight:500}
+.ag-docs li{display:flex;align-items:center;gap:8px}.ag-docs li a{flex:1}
+.ag-doc{font:600 11.5px var(--f,system-ui);font-style:normal;padding:3px 8px;border-radius:999px;background:#eee}
+.ag-d-validado{background:#e6f4ec;color:#1f7a45}.ag-d-rechazado{background:#fbe7e4;color:#9d2f25}.ag-d-pendiente{background:#fdf1dd;color:#a5650c}
+.ag-lines li{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--line,#e4ddd0)}
+.ag-lines small{display:block;color:var(--mute,#7d857f)}
+.ag-tot{text-align:right}
+#ag-modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:99999;padding:16px}
+.ag-box{background:#fffdf9;border-radius:22px;max-width:520px;width:100%;max-height:90vh;overflow:auto;padding:22px;position:relative;font-family:var(--f,system-ui)}
+.ag-x{position:absolute;top:10px;right:12px;border:0;background:none;font-size:26px;cursor:pointer}
+/* configurador */
+#ag-cfg-bar{position:fixed;left:50%;bottom:86px;transform:translateX(-50%);z-index:60;display:flex;gap:8px;align-items:center;background:#1c201d;color:#fff;padding:8px 8px 8px 16px;border-radius:999px;box-shadow:0 10px 30px rgba(0,0,0,.25);font:600 13px system-ui,sans-serif;max-width:calc(100vw - 24px)}
+#ag-cfg-bar button{border:0;border-radius:999px;padding:9px 14px;font:600 13px system-ui,sans-serif;background:#b4783f;color:#fff;cursor:pointer;white-space:nowrap}
+#ag-cfg-bar span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}

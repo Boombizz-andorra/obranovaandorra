@@ -9,7 +9,7 @@ const FLOOR = {0:{n:'Planta baixa',s:'PB',img:'img/floor-0.webp'},1:{n:'Primera 
 const EXT = {none:'',patio:'Pati comunitari',garden:'Jardí',balcony:'Balcó',terrace:'Terrassa'};
 const ST = Object.assign({available:'Disponible',agreed:'Aparaulat',reserved:'Reserva tècnica',confirmed:'Reserva confirmada',sold:'Venut'}, (window.AXS && AXS.st) || {});
 const stc = s => s === 'available' ? '' : s === 'confirmed' ? 'reserved' : s; // classe visual de cada estat
-const pv = (h, v) => h.price == null ? '—' : h.status === 'agreed' ? `<span class="pblur" title="${ST.agreed}">${eur(v)}</span>` : eur(v); // preu només si el Hub el deixa veure; aparaulat, difuminat com a la pàgina actual
+const pv = (h, v) => h.price == null ? '—' : h.status === 'agreed' && !document.body.classList.contains('ag-on') ? `<span class="pblur" title="${ST.agreed}">${eur(v)}</span>` : eur(v); // preu només si el Hub el deixa veure; aparaulat, difuminat com a la pàgina actual
 /* tipologies: banys coneguts, vista 3D disponible i dades del configurador */
 const TYPE = {1:{tag:'Loft'},2:{},3:{tag:'Amb safareig',baths:2,d3:'t3'},4:{tag:'Amb suite',baths:2,d3:'t4',floorM2:52.07,util:59.78},5:{baths:2,d3:'t5'},6:{d3:'t7',d3ref:'T7'},7:{baths:1,d3:'t7'},8:{tag:'Amb suite',baths:2,d3:'t4',d3ref:'T4'},9:{d3:'t5',d3ref:'T5'},10:{d3:'t7',d3ref:'T7'}};
 const cfgOK = h => !!h.cfg; // configurador actual del plugin
@@ -92,7 +92,7 @@ function closeSheet(){ if (!sheet.classList.contains('on')) return; sheet.classL
 $('#sh-x').onclick = closeSheet;
 function unitSheetHTML(h){ const T = TYPE[h.type]; return `<div class="sh-h"><h2>${esc(h.name)}</h2>${badge(h)}</div><p class="sub">Tipologia T${h.type}${T.tag ? ' · ' + T.tag : ''} · ${FLOOR[h.floor].n}</p>
   <dl class="facts"><div><dt>Preu</dt><dd>${pv(h, h.price)} <small style="font:500 11px var(--f);color:var(--mute)">+ IGI</small></dd></div><div><dt>Superfície</dt><dd>${m2(h.area)}</dd></div><div><dt>Dormitoris</dt><dd>${h.beds}</dd></div><div><dt>${EXT[h.ext] ? 'Exterior' : 'Preu/m²'}</dt><dd>${EXT[h.ext] ? extTxt(h) : pv(h, h.price/h.area)}</dd></div></dl>
-  <div class="row2"><a class="btn ghost" href="#pis-${slug(h.id)}">${ico('plan')}Veure fitxa</a>${cfgOK(h) ? `<a class="btn wood" href="#cfg-${slug(h.id)}">${ico('brush')}Configurar</a>` : `<span class="btn" style="opacity:.45">Configurador aviat</span>`}</div>`; }
+  <div class="row2"><a class="btn ghost" href="#pis-${slug(h.id)}">${ico('plan')}Veure fitxa</a>${cfgOK(h) ? `<a class="btn wood" href="#cfg-${slug(h.id)}">${ico('brush')}Configurar</a>` : `<span class="btn" style="opacity:.45">Configurador aviat</span>`}</div>${window.AXA && AXA.sheet ? AXA.sheet(h) : ''}`; }
 const PAYS = [['Fonaments','Quan un arquitecte en certifica la fase',.10],['Sostre','Quan un arquitecte en certifica la fase',.20],['Tancament de façana','Quan un arquitecte en certifica la fase',.20],['Notari','A l’escriptura pública',.40]];
 function payHTML(base){ return `<ul class="pay"><li><span>Reserva<small>Et guardem el pis un mes</small></span><b>10.000 €</b></li><li><span>Arres<small>10 % menys la reserva</small></span><b>${eur(base*.1-10000)}</b></li>${PAYS.map(([n,t,f]) => `<li><span>${n}<small>${t}</small></span><b>${eur(base*f)}</b></li>`).join('')}</ul><p class="note">Calculat sobre ${eur(base)}, sense IGI. Cal afegir l’IGI (${nf2.format(IGI)} %) a cada pagament.</p>`; }
 
@@ -228,9 +228,9 @@ function uRender(h, tab){ uHome = h; const T = TYPE[h.type]; const tabs = [['pla
   $('#pis-tabs').innerHTML = tabs.map(t => `<button class="${t[0] === uTab ? 'on' : ''}" data-t="${t[0]}">${ico(t[2])}<span>${t[1]}</span></button>`).join('');
   const src = uTab === '3d' ? `img/plan3d-${T.d3}.webp` : `img/type-${h.type}.webp`; const img = $('#u-img'); img.style.opacity = 0;
   const pre = new Image(); pre.onload = () => { img.src = src; img.alt = (uTab === '3d' ? 'Vista 3D' : 'Plànol') + ' de l’habitatge ' + h.name; uPZ.size(pre.naturalWidth, pre.naturalHeight); img.style.transition = 'opacity .3s'; img.style.opacity = 1; }; pre.src = src;
-  $('#u-name').textContent = h.name; $('#u-st').outerHTML = badge(h).replace('class="badge', 'id="u-st" class="badge'); $('#u-price').textContent = pv(h, h.price);
+  $('#u-name').textContent = h.name; $('#u-st').outerHTML = badge(h).replace('class="badge', 'id="u-st" class="badge'); $('#u-price').innerHTML = pv(h, h.price);
   $('#u-ref').textContent = uTab === '3d' ? (T.d3ref ? `Vista 3D de referència de la tipologia ${T.d3ref}. ` : '') + 'Mobiliari orientatiu, no inclòs.' : 'Plànol orientatiu del dossier comercial.';
-  $('#u-cfg').hidden = !cfgOK(h); }
+  $('#u-cfg').hidden = !cfgOK(h); window.AXA && AXA.unit && AXA.unit(h); }
 $('#pis-tabs').onclick = e => { const b = e.target.closest('[data-t]'); if (!b) return; if (b.dataset.t === 'galeria') return openLB(0); setHash('pis-' + slug(uHome.id) + (b.dataset.t === '3d' ? '-3d' : ''), true); uRender(uHome, b.dataset.t); };
 $('#u-cfg').onclick = () => location.hash = 'cfg-' + slug(uHome.id);
 $('#u-fitxa').onclick = () => { const h = uHome, T = TYPE[h.type]; openSheet(`<div class="sh-h"><h2>${h.name}</h2>${badge(h)}</div><p class="sub">Tipologia T${h.type}${T.tag ? ' · ' + T.tag : ''} · ${FLOOR[h.floor].n}</p>
@@ -632,5 +632,7 @@ uPZ = new PZ($('#u-vp'), $('#u-pz'), 1191, 1685, 'contain'); uPZ.pad = 16; uPZ.p
 $('#app').hidden = true;
 $('#introv').src = 'video/intro.mp4'; $('#introv').play().catch(() => {});
 $('#enter').onclick = () => { window.__enter = 1; location.hash = 'edifici'; };
+window.AXSR = { HOMES, byId, openSheet, closeSheet, toast, badge, ST, closeMenu: () => setMenu(false), get route(){ return route; }, get uHome(){ return uHome; },
+  rerender(){ try { if (route && route.s === 'pis' && uHome) uRender(uHome, uTab); hRender(); if (route && route.s === 'planta') pRender(pFloor); } catch(e){} } };
 addEventListener('hashchange', go); go();
 })();
