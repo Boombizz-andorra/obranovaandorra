@@ -13,10 +13,17 @@ foreach ( $homes as $hm ) {
 		'cfg' => ( $axs_cfg_on && '' !== $hm['cfg'] && 'available' === $hm['status'] ) ? axr_url( $lang, $hm['id'] ) : '',
 	);
 }
+/* v4.2: tipologies amb tour virtual 360° (assets/tour/t<N>/tour.json) */
+$axs_tours = array();
+foreach ( (array) glob( AXR_DIR . 'assets/tour/t*/tour.json' ) as $axs_tf ) {
+	$axs_tn = (int) substr( basename( dirname( $axs_tf ) ), 1 );
+	if ( $axs_tn ) { $axs_tours[ $axs_tn ] = trailingslashit( axr_url( $lang ) ) . 'tour-virtual/t' . $axs_tn . '/'; }
+}
 $axs_js = isset( $t['js'] ) ? $t['js'] : array();
 $axs_boot = array(
 	'lang'  => $lang,
 	'homes' => $axs_homes,
+	'tours' => $axs_tours,
 	'phone' => preg_replace( '/[^0-9]/', '', (string) $settings['phone'] ),
 	'st'    => array(
 		'available' => isset( $axs_js['st_available'] ) ? $axs_js['st_available'] : 'Disponible',
@@ -185,6 +192,7 @@ axr_head_common( $lang, $axs_t, $axs_d ); ?>
     <div class="ubar">
       <div class="info"><span><b id="u-name"></b> <span class="badge" id="u-st"></span></span><b id="u-price"></b></div>
       <button class="btn ghost" id="u-fitxa"><svg class="i"><use href="#i-info"/></svg>Fitxa</button>
+      <button class="btn ghost" id="u-tour" hidden><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><ellipse cx="12" cy="12" rx="10" ry="4.2"/><path d="M12 2.5c2.6 2.2 4 5.7 4 9.5s-1.4 7.3-4 9.5M12 2.5C9.4 4.7 8 8.2 8 12s1.4 7.3 4 9.5"/></svg>Fer un tour virtual</button>
       <button class="btn wood" id="u-cfg"><svg class="i"><use href="#i-brush"/></svg>Configurar acabats</button>
     </div>
   </section>

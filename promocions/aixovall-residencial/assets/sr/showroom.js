@@ -13,6 +13,8 @@ const pv = (h, v) => h.price == null ? '—' : h.status === 'agreed' && !documen
 /* tipologies: banys coneguts, vista 3D disponible i dades del configurador */
 const TYPE = {1:{tag:'Loft'},2:{},3:{tag:'Amb safareig',baths:2,d3:'t3'},4:{tag:'Amb suite',baths:2,d3:'t4',floorM2:52.07,util:59.78},5:{baths:2,d3:'t5'},6:{d3:'t7',d3ref:'T7'},7:{baths:1,d3:'t7'},8:{tag:'Amb suite',baths:2,d3:'t4',d3ref:'T4'},9:{d3:'t5',d3ref:'T5'},10:{d3:'t7',d3ref:'T7'}};
 const cfgOK = h => !!h.cfg; // configurador actual del plugin
+const tourU = h => (window.AXS && AXS.tours && AXS.tours[h.type]) || ''; // tour virtual 360° de la tipologia, si n'hi ha
+const tourA = (h, st) => tourU(h) ? `<a class="btn ghost" ${st || ''} href="${tourU(h)}" target="axr-tour" rel="noopener"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><ellipse cx="12" cy="12" rx="10" ry="4.2"/><path d="M12 2.5c2.6 2.2 4 5.7 4 9.5s-1.4 7.3-4 9.5M12 2.5C9.4 4.7 8 8.2 8 12s1.4 7.3 4 9.5"/></svg>Fer un tour virtual</a>` : '';
 /* polígons de cada habitatge sobre el plànol de planta (968×1173) */
 const POLY = {
  0:{'PB-3':'205,60 905,60 905,420 712,420 712,490 565,490 565,365 420,365 420,270 205,270','PB-2':'205,272 420,272 420,368 562,368 562,690 205,690','PB-1':'205,692 460,692 460,1010 205,985'},
@@ -92,7 +94,7 @@ function closeSheet(){ if (!sheet.classList.contains('on')) return; sheet.classL
 $('#sh-x').onclick = closeSheet;
 function unitSheetHTML(h){ const T = TYPE[h.type]; return `<div class="sh-h"><h2>${esc(h.name)}</h2>${badge(h)}</div><p class="sub">Tipologia T${h.type}${T.tag ? ' · ' + T.tag : ''} · ${FLOOR[h.floor].n}</p>
   <dl class="facts"><div><dt>Preu</dt><dd>${pv(h, h.price)} <small style="font:500 11px var(--f);color:var(--mute)">+ IGI</small></dd></div><div><dt>Superfície</dt><dd>${m2(h.area)}</dd></div><div><dt>Dormitoris</dt><dd>${h.beds}</dd></div><div><dt>${EXT[h.ext] ? 'Exterior' : 'Preu/m²'}</dt><dd>${EXT[h.ext] ? extTxt(h) : pv(h, h.price/h.area)}</dd></div></dl>
-  <div class="row2"><a class="btn ghost" href="#pis-${slug(h.id)}">${ico('plan')}Veure fitxa</a>${cfgOK(h) ? `<a class="btn wood" href="#cfg-${slug(h.id)}">${ico('brush')}Configurar</a>` : `<span class="btn" style="opacity:.45">Configurador aviat</span>`}</div>${window.AXA && AXA.sheet ? AXA.sheet(h) : ''}`; }
+  <div class="row2"><a class="btn ghost" href="#pis-${slug(h.id)}">${ico('plan')}Veure fitxa</a>${cfgOK(h) ? `<a class="btn wood" href="#cfg-${slug(h.id)}">${ico('brush')}Configurar</a>` : `<span class="btn" style="opacity:.45">Configurador aviat</span>`}</div>${tourU(h) ? `<div class="row2" style="margin-top:8px">${tourA(h, 'style="grid-column:1/-1"')}</div>` : ''}${window.AXA && AXA.sheet ? AXA.sheet(h) : ''}`; }
 const PAYS = [['Fonaments','Quan un arquitecte en certifica la fase',.10],['Sostre','Quan un arquitecte en certifica la fase',.20],['Tancament de façana','Quan un arquitecte en certifica la fase',.20],['Notari','A l’escriptura pública',.40]];
 function payHTML(base){ return `<ul class="pay"><li><span>Reserva<small>Et guardem el pis un mes</small></span><b>10.000 €</b></li><li><span>Arres<small>10 % menys la reserva</small></span><b>${eur(base*.1-10000)}</b></li>${PAYS.map(([n,t,f]) => `<li><span>${n}<small>${t}</small></span><b>${eur(base*f)}</b></li>`).join('')}</ul><p class="note">Calculat sobre ${eur(base)}, sense IGI. Cal afegir l’IGI (${nf2.format(IGI)} %) a cada pagament.</p>`; }
 
@@ -212,7 +214,7 @@ function hRender(){ const ff = $('#f-floor').value, fb = $('#f-beds').value, so 
    <div class="in"><h3>${h.name}<small>T${h.type} · ${FLOOR[h.floor].n}</small></h3><div class="price">${pv(h, h.price)} <small>+ IGI</small></div>
    <div class="chips"><span>${beds(h.beds)}</span><span>${m2(h.area)}</span>${T.baths ? `<span>${T.baths} ${T.baths > 1 ? 'banys' : 'bany'}</span>` : ''}${EXT[h.ext] ? `<span>${extTxt(h)}</span>` : ''}${T.tag ? `<span>${T.tag}</span>` : ''}</div>
    <label class="cmp"><input type="checkbox" data-cmp="${h.id}" ${cmp.has(h.id) ? 'checked' : ''}> Comparar</label>
-   <div class="acts"><a class="btn ghost" href="#pis-${slug(h.id)}">Veure fitxa</a>${cfgOK(h) ? `<a class="btn wood" href="#cfg-${slug(h.id)}">Configurar</a>` : `<span class="btn" style="opacity:.4">Aviat</span>`}</div></div></article>`; }).join('') : '<p class="lead">No hi ha habitatges amb aquests filtres. Prova una altra combinació.</p>';
+   <div class="acts"><a class="btn ghost" href="#pis-${slug(h.id)}">Veure fitxa</a>${cfgOK(h) ? `<a class="btn wood" href="#cfg-${slug(h.id)}">Configurar</a>` : `<span class="btn" style="opacity:.4">Aviat</span>`}</div>${tourU(h) ? `<div class="acts" style="margin-top:6px">${tourA(h, 'style="flex:1;grid-column:1/-1"')}</div>` : ''}</div></article>`; }).join('') : '<p class="lead">No hi ha habitatges amb aquests filtres. Prova una altra combinació.</p>';
   cmpBar(); }
 function cmpBar(){ const b = $('#cmpbar'); b.classList.toggle('on', cmp.size >= 2 && route.s === 'habitatges'); b.querySelector('span').textContent = `Comparar ${cmp.size} habitatges`; }
 ['f-floor','f-beds','f-sort','f-av','f-fav'].forEach(id => $('#'+id).onchange = hRender);
@@ -230,9 +232,10 @@ function uRender(h, tab){ uHome = h; const T = TYPE[h.type]; const tabs = [['pla
   const pre = new Image(); pre.onload = () => { img.src = src; img.alt = (uTab === '3d' ? 'Vista 3D' : 'Plànol') + ' de l’habitatge ' + h.name; uPZ.size(pre.naturalWidth, pre.naturalHeight); img.style.transition = 'opacity .3s'; img.style.opacity = 1; }; pre.src = src;
   $('#u-name').textContent = h.name; $('#u-st').outerHTML = badge(h).replace('class="badge', 'id="u-st" class="badge'); $('#u-price').innerHTML = pv(h, h.price);
   $('#u-ref').textContent = uTab === '3d' ? (T.d3ref ? `Vista 3D de referència de la tipologia ${T.d3ref}. ` : '') + 'Mobiliari orientatiu, no inclòs.' : 'Plànol orientatiu del dossier comercial.';
-  $('#u-cfg').hidden = !cfgOK(h); window.AXA && AXA.unit && AXA.unit(h); }
+  $('#u-cfg').hidden = !cfgOK(h); $('#u-tour').hidden = !tourU(h); window.AXA && AXA.unit && AXA.unit(h); }
 $('#pis-tabs').onclick = e => { const b = e.target.closest('[data-t]'); if (!b) return; if (b.dataset.t === 'galeria') return openLB(0); setHash('pis-' + slug(uHome.id) + (b.dataset.t === '3d' ? '-3d' : ''), true); uRender(uHome, b.dataset.t); };
 $('#u-cfg').onclick = () => location.hash = 'cfg-' + slug(uHome.id);
+$('#u-tour').onclick = () => { const w = window.open(tourU(uHome), 'axr-tour'); if (!w) location.href = tourU(uHome); };
 $('#u-fitxa').onclick = () => { const h = uHome, T = TYPE[h.type]; openSheet(`<div class="sh-h"><h2>${h.name}</h2>${badge(h)}</div><p class="sub">Tipologia T${h.type}${T.tag ? ' · ' + T.tag : ''} · ${FLOOR[h.floor].n}</p>
   <dl class="facts"><div><dt>Preu</dt><dd>${pv(h, h.price)}</dd></div><div><dt>Amb IGI</dt><dd>${pv(h, h.price*(1+IGI/100))}</dd></div><div><dt>Superfície construïda</dt><dd>${m2(h.area)}</dd></div><div><dt>Preu/m²</dt><dd>${pv(h, h.price/h.area)}</dd></div><div><dt>Dormitoris</dt><dd>${h.beds}</dd></div>${T.baths ? `<div><dt>Banys</dt><dd>${T.baths}</dd></div>` : ''}${EXT[h.ext] ? `<div><dt>Exterior</dt><dd>${extTxt(h)}</dd></div>` : ''}</dl>${mbStrip(h.id)}
   <h3 style="margin-top:16px;font-size:18px">Pla de pagaments</h3>${h.price != null ? payHTML(h.price) : `<p class="note">${ST[h.status]}</p>`}

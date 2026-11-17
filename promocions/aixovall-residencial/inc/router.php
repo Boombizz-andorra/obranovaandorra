@@ -1,7 +1,7 @@
 <?php
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
-/** Interpreta la ruta: /aixovall-residencial/[es|fr|en/][configurador/<id>/] */
+/** Interpreta la ruta: /aixovall-residencial/[es|fr|en/][configurador/<id>/ | tour-virtual/<tipus>/] */
 function axr_parse_route() {
 	static $route = null;
 	if ( null !== $route ) { return $route; }
@@ -11,10 +11,11 @@ function axr_parse_route() {
 	$home  = (string) wp_parse_url( home_url( '/' ), PHP_URL_PATH );
 	if ( '' !== $home && '/' !== $home && 0 === strpos( $path, $home ) ) { $path = substr( $path, strlen( $home ) ); }
 	$path = trim( $path, '/' );
-	if ( preg_match( '#^' . preg_quote( AXR_SLUG, '#' ) . '(?:/(ca|es|fr|en))?(?:/configurador/([A-Za-z0-9-]{1,12}))?$#', $path, $m ) ) {
+	if ( preg_match( '#^' . preg_quote( AXR_SLUG, '#' ) . '(?:/(ca|es|fr|en))?(?:/configurador/([A-Za-z0-9-]{1,12})|/tour-virtual/(t[0-9]{1,2}))?$#', $path, $m ) ) {
 		$route = array(
 			'lang' => ! empty( $m[1] ) ? $m[1] : 'ca',
 			'home' => ! empty( $m[2] ) ? strtoupper( $m[2] ) : '',
+			'tour' => ! empty( $m[3] ) ? strtolower( $m[3] ) : '',
 		);
 	}
 	return $route;
@@ -47,6 +48,12 @@ function axr_render() {
 	status_header( 200 );
 	header( 'Content-Type: text/html; charset=utf-8' );
 
+	/* v4.2: tour virtual 360° d'una tipologia */
+	if ( '' !== $route['tour'] ) {
+		$tour = $route['tour'];
+		include AXR_DIR . 'templates/tour.php';
+		exit;
+	}
 	if ( '' !== $route['home'] ) {
 		$home = isset( $homes[ $route['home'] ] ) ? $homes[ $route['home'] ] : null;
 		if ( ! $home || '' === $home['cfg'] || empty( $settings['cfg_enabled'] ) ) {

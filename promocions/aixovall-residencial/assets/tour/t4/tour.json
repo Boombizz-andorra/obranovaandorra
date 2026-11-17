@@ -1,0 +1,78 @@
+{
+ "title": "Tour virtual · Tipologia T4",
+ "floor": 3.0,
+ "note": "Recorregut de referència de la tipologia T4 (pis pilot de la 1a planta). Mobiliari i decoració orientatius, no inclosos; acabats pendents de validar amb la memòria de qualitats. Les vistes exteriors són aproximades.",
+ "scenes": [
+  {
+   "id": "salo",
+   "label": "Saló i menjador",
+   "short": "Saló",
+   "pos": [
+    12.3,
+    2.7,
+    4.6
+   ],
+   "yaw": 0.0
+  },
+  {
+   "id": "cuina",
+   "label": "Cuina",
+   "short": "Cuina",
+   "pos": [
+    13.3,
+    5.5,
+    4.6
+   ]
+  },
+  {
+   "id": "distribuidor",
+   "label": "Distribuïdor",
+   "short": "Pas",
+   "pos": [
+    8,
+    6,
+    4.6
+   ]
+  },
+  {
+   "id": "dormitori1",
+   "label": "Dormitori 1",
+   "short": "Dorm. 1",
+   "pos": [
+    6.7,
+    3,
+    4.6
+   ]
+  },
+  {
+   "id": "dormitori2",
+   "label": "Dormitori 2",
+   "short": "Dorm. 2",
+   "pos": [
+    10.3,
+    3.5,
+    4.6
+   ]
+  },
+  {
+   "id": "bany1",
+   "label": "Bany 1",
+   "short": "Bany 1",
+   "pos": [
+    5,
+    6,
+    4.6
+   ]
+  },
+  {
+   "id": "bany2",
+   "label": "Bany 2",
+   "short": "Bany 2",
+   "pos": [
+    9.7,
+    7.5,
+    4.6
+   ]
+  }
+ ]
+}

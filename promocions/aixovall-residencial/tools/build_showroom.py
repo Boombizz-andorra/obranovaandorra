@@ -108,6 +108,17 @@ js = patch(js, "addEventListener('hashchange', go); go();\n})();",
     "window.AXSR = { HOMES, byId, openSheet, closeSheet, toast, badge, ST, closeMenu: () => setMenu(false), get route(){ return route; }, get uHome(){ return uHome; },\n"
     "  rerender(){ try { if (route && route.s === 'pis' && uHome) uRender(uHome, uTab); hRender(); if (route && route.s === 'planta') pRender(pFloor); } catch(e){} } };\n"
     "addEventListener('hashchange', go); go();\n})();", 'interfície per al mode agent')
+# ---------- v4.2: tour virtual 360° per tipologia (AXS.tours, templates/tour.php) ----------
+TOUR_SVG = '<svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><ellipse cx="12" cy="12" rx="10" ry="4.2"/><path d="M12 2.5c2.6 2.2 4 5.7 4 9.5s-1.4 7.3-4 9.5M12 2.5C9.4 4.7 8 8.2 8 12s1.4 7.3 4 9.5"/></svg>'
+body = patch(body, '      <button class="btn wood" id="u-cfg">', '      <button class="btn ghost" id="u-tour" hidden>' + TOUR_SVG + 'Fer un tour virtual</button>\n      <button class="btn wood" id="u-cfg">', 'botó tour virtual a la fitxa')
+js = patch(js, "const cfgOK = h => !!h.cfg; // configurador actual del plugin",
+    "const cfgOK = h => !!h.cfg; // configurador actual del plugin\n"
+    "const tourU = h => (window.AXS && AXS.tours && AXS.tours[h.type]) || ''; // tour virtual 360° de la tipologia, si n'hi ha\n"
+    "const tourA = (h, st) => tourU(h) ? `<a class=\"btn ghost\" ${st || ''} href=\"${tourU(h)}\" target=\"axr-tour\" rel=\"noopener\">" + TOUR_SVG.replace('"', '\\"') + "Fer un tour virtual</a>` : '';", 'enllaç tour virtual')
+js = patch(js, "  $('#u-cfg').hidden = !cfgOK(h); window.AXA", "  $('#u-cfg').hidden = !cfgOK(h); $('#u-tour').hidden = !tourU(h); window.AXA", 'tour virtual visible a la fitxa')
+js = patch(js, "$('#u-cfg').onclick = () => location.hash = 'cfg-' + slug(uHome.id);", "$('#u-cfg').onclick = () => location.hash = 'cfg-' + slug(uHome.id);\n$('#u-tour').onclick = () => { const w = window.open(tourU(uHome), 'axr-tour'); if (!w) location.href = tourU(uHome); };", 'obrir el tour en una finestra nova')
+js = patch(js, '<span class="btn" style="opacity:.45">Configurador aviat</span>`}</div>${window.AXA', '<span class="btn" style="opacity:.45">Configurador aviat</span>`}</div>${tourU(h) ? `<div class="row2" style="margin-top:8px">${tourA(h, \'style="grid-column:1/-1"\')}</div>` : \'\'}${window.AXA', 'tour virtual al full del pis')
+js = patch(js, '`<span class="btn" style="opacity:.4">Aviat</span>`}</div></div></article>`; })', '`<span class="btn" style="opacity:.4">Aviat</span>`}</div>${tourU(h) ? `<div class="acts" style="margin-top:6px">${tourA(h, \'style="flex:1;grid-column:1/-1"\')}</div>` : \'\'}</div></article>`; })', 'tour virtual a la llista d\'habitatges')
 (ROOT / 'assets/sr/showroom.css').write_text(css, encoding='utf-8')
 (ROOT / 'assets/sr/showroom.js').write_text(js, encoding='utf-8')
 tpl = """<?php
@@ -125,10 +136,17 @@ foreach ( $homes as $hm ) {
 		'cfg' => ( $axs_cfg_on && '' !== $hm['cfg'] && 'available' === $hm['status'] ) ? axr_url( $lang, $hm['id'] ) : '',
 	);
 }
+/* v4.2: tipologies amb tour virtual 360° (assets/tour/t<N>/tour.json) */
+$axs_tours = array();
+foreach ( (array) glob( AXR_DIR . 'assets/tour/t*/tour.json' ) as $axs_tf ) {
+	$axs_tn = (int) substr( basename( dirname( $axs_tf ) ), 1 );
+	if ( $axs_tn ) { $axs_tours[ $axs_tn ] = trailingslashit( axr_url( $lang ) ) . 'tour-virtual/t' . $axs_tn . '/'; }
+}
 $axs_js = isset( $t['js'] ) ? $t['js'] : array();
 $axs_boot = array(
 	'lang'  => $lang,
 	'homes' => $axs_homes,
+	'tours' => $axs_tours,
 	'phone' => preg_replace( '/[^0-9]/', '', (string) $settings['phone'] ),
 	'st'    => array(
 		'available' => isset( $axs_js['st_available'] ) ? $axs_js['st_available'] : 'Disponible',
