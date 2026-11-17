@@ -114,7 +114,7 @@ body = patch(body, '      <button class="btn wood" id="u-cfg">', '      <button 
 js = patch(js, "const cfgOK = h => !!h.cfg; // configurador actual del plugin",
     "const cfgOK = h => !!h.cfg; // configurador actual del plugin\n"
     "const tourU = h => (window.AXS && AXS.tours && AXS.tours[h.type]) || ''; // tour virtual 360° de la tipologia, si n'hi ha\n"
-    "const tourA = (h, st) => tourU(h) ? `<a class=\"btn ghost\" ${st || ''} href=\"${tourU(h)}\" target=\"axr-tour\" rel=\"noopener\">" + TOUR_SVG.replace('"', '\\"') + "Fer un tour virtual</a>` : '';", 'enllaç tour virtual')
+    "const tourA = (h, st) => tourU(h) ? `<a class=\"btn ghost\" ${st || ''} href=\"${tourU(h)}\" target=\"axr-tour\" rel=\"noopener\">" + TOUR_SVG + "Fer un tour virtual</a>` : '';", 'enllaç tour virtual')
 js = patch(js, "  $('#u-cfg').hidden = !cfgOK(h); window.AXA", "  $('#u-cfg').hidden = !cfgOK(h); $('#u-tour').hidden = !tourU(h); window.AXA", 'tour virtual visible a la fitxa')
 js = patch(js, "$('#u-cfg').onclick = () => location.hash = 'cfg-' + slug(uHome.id);", "$('#u-cfg').onclick = () => location.hash = 'cfg-' + slug(uHome.id);\n$('#u-tour').onclick = () => { const w = window.open(tourU(uHome), 'axr-tour'); if (!w) location.href = tourU(uHome); };", 'obrir el tour en una finestra nova')
 js = patch(js, '<span class="btn" style="opacity:.45">Configurador aviat</span>`}</div>${window.AXA', '<span class="btn" style="opacity:.45">Configurador aviat</span>`}</div>${tourU(h) ? `<div class="row2" style="margin-top:8px">${tourA(h, \'style="grid-column:1/-1"\')}</div>` : \'\'}${window.AXA', 'tour virtual al full del pis')

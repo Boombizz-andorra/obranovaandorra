@@ -24,7 +24,7 @@ const POLY = {
 /* vistes exteriors + zones de planta sobre la vista 1 (1600×900) */
 const VIEWS = [{k:'v1',n:'Carrer'},{k:'v2',n:'Façana'},{k:'v3',n:'Secció'}];
 /* contorn de cada planta sobre la vista 1, seguint la perspectiva: línies a la cantonada esquerra (L), l'aresta (C) i la dreta (R) */
-const FX = {L:335, C:600, R:1200}, FLN = [[215,60,190],[250,165,278],[395,355,435],[550,545,582],[740,725,730],[860,880,850]];
+const FX = {L:318, C:775, R:1240}, FLN = [[142,104,170],[253,253,255],[365,385,367],[477,522,479],[607,667,615],[787,809,709]];
 const BANDS = [4,3,2,1,0].map((f,i) => { const a = FLN[i], b = FLN[i+1]; return {f, pts:`${FX.L},${a[0]} ${FX.C},${a[1]} ${FX.R},${a[2]} ${FX.R},${b[2]} ${FX.C},${b[1]} ${FX.L},${b[0]}`, yr:(a[2]+b[2])/2, yc:(a[1]+b[1]+a[2]+b[2])/4, edge:`M${FX.C} ${a[1]}V${b[1]}`}; });
 const GAL = [['cfg/ga_1.webp','Saló'],['cfg/ga_2.webp','Menjador'],['cfg/ga_3.webp','Suite'],['cfg/ga_4.webp','Balcó',1],['img/terrace-t5.webp','Menjador i terrassa'],['img/living-t5.webp','Sala d’estar',1],['img/living-t7.webp','Saló menjador'],['img/room-t5.webp','Habitació individual']];
 /* catàleg d'acabats (preus sense IGI) */
@@ -121,11 +121,15 @@ $('#b-full').onclick = async () => { try { document.fullscreenElement ? await do
 $('#b-back').onclick = () => { const r = route; location.hash = r.s === 'pis' ? 'planta-' + (byId(r.id)?.floor ?? 1) : r.s === 'planta' ? 'edifici' : 'edifici'; };
 
 /* ================= EDIFICI ================= */
-let ePZ, eState = {v:0, night:0, mati:0}, eBusy = false, eAuto = 0; const blobs = {};
+let ePZ, eState = {v:0, night:0, mati:0, mig:0}, eBusy = false, eAuto = 0; const blobs = {};
 const vfile = (a, b, n) => `video/${a}-${b}${n ? 'n' : ''}.mp4`;
 async function prefetch(f){ if (blobs[f] !== undefined || reduce) return; blobs[f] = null; try { const r = await fetch(f); if (r.ok) blobs[f] = URL.createObjectURL(await r.blob()); } catch(e){} }
-function warm(){ const k = VIEWS[eState.v].k, n = eState.night; VIEWS.forEach(o => { if (o.k !== k) prefetch(vfile(k, o.k, n)); }); prefetch(`video/${k}-${n ? 'day' : 'night'}.mp4`); VIEWS.forEach(o => { new Image().src = `view/${o.k}${n ? 'n' : ''}.webp`; }); }
-const eImgSrc = () => `view/${VIEWS[eState.v].k}${eState.night ? 'n' : ''}.webp`;
+function warm(){ const k = VIEWS[eState.v].k, n = eState.night; if (k === 'v1'){ ['', 'n', 'm', 'd'].forEach(x => { new Image().src = `view/f1${x}.webp`; }); } else { VIEWS.forEach(o => { if (o.k !== k && o.k !== 'v1') prefetch(vfile(k, o.k, n)); }); prefetch(`video/${k}-${n ? 'day' : 'night'}.mp4`); } VIEWS.forEach(o => { new Image().src = `view/${o.k}${n ? 'n' : ''}.webp`; }); }
+/* la vista 1 (carrer) té un render per a cada moment del dia: f1 tarda · f1n nit · f1m matí · f1d migdia */
+const eImgSrc = () => eState.v === 0 ? `view/f1${eState.night ? 'n' : eState.mati ? 'm' : eState.mig ? 'd' : ''}.webp` : `view/${VIEWS[eState.v].k}${eState.night ? 'n' : ''}.webp`;
+/* fosa suau quan no hi ha vídeo de transició */
+function eFade(){ const img = $('#e-img'), next = eImgSrc(); if (reduce || !img.getAttribute('src')){ img.src = next; return; } const old = $('#e-xf'); old && old.remove(); const g = img.cloneNode(); g.id = 'e-xf'; g.removeAttribute('alt'); img.after(g);
+  const go = () => { requestAnimationFrame(() => requestAnimationFrame(() => { g.style.opacity = 0; setTimeout(() => g.remove(), 1000); })); }; const pre = new Image(); pre.onload = pre.onerror = () => { img.src = next; go(); }; pre.src = next; }
 function playTo(file, done){ const vid = $('#e-vid'), img = $('#e-img'); const nextSrc = eImgSrc();
   const finish = () => { clearTimeout(guard); const pre = new Image(); pre.onload = pre.onerror = () => { img.src = nextSrc; requestAnimationFrame(() => setTimeout(() => { vid.classList.remove('show'); eBusy = false; done && done(); }, 60)); }; pre.src = nextSrc; };
   if (reduce){ img.src = nextSrc; eBusy = false; done && done(); return; }
@@ -133,34 +137,56 @@ function playTo(file, done){ const vid = $('#e-vid'), img = $('#e-img'); const n
   vid.onended = finish; vid.onerror = finish; vid.onplaying = () => vid.classList.add('show');
   vid.src = blobs[file] || file; vid.currentTime = 0; vid.play().catch(finish); }
 function eRender(anim, prev){ const v = VIEWS[eState.v]; $('#e-dots').innerHTML = VIEWS.map((o,i) => `<button class="${i === eState.v ? 'on' : ''}" data-v="${i}">${o.n}</button>`).join('');
-  const tod = eState.mati ? 2 : eState.night; $$('#dn button').forEach(b => { if (b.dataset.n === 'a'){ b.classList.add('auto'); b.classList.toggle('on', !!eAuto); } else b.classList.toggle('on', +b.dataset.n === tod); }); $('#e-pz').classList.toggle('mati', !!eState.mati);
+  const tod = eTod(); $$('#dn button').forEach(b => { if (b.dataset.n === 'a'){ b.classList.add('auto'); b.classList.toggle('on', !!eAuto); } else b.classList.toggle('on', +b.dataset.n === tod); }); $('#e-pz').classList.toggle('mati', !!eState.mati); $('#e-pz').classList.toggle('v1', v.k === 'v1');
+  { const H = v.k === 'v1' ? 1200 : 900; if (ePZ && ePZ.h !== H){ ePZ.fy = H === 1200 ? .3 : .45; ePZ.size(1600, H); } $('#e-ov').setAttribute('viewBox', '0 0 1600 ' + H); if (v.k !== 'v1') $('#e-cars').innerHTML = ''; }
   $('#e-ov').innerHTML = ''; $('#e-labs').innerHTML = '';
   const draw = () => { if (v.k === 'v1'){ $('#e-ov').innerHTML = BANDS.map(b => `<polygon class="zone" data-f="${b.f}" points="${b.pts}"/>`).join('');
-      $('#e-labs').innerHTML = BANDS.map(b => { const f = b.f, a = HOMES.filter(h => h.floor === f && h.status === 'available').length; return `<button class="lab" data-f="${f}" style="left:${innerWidth < 760 ? 900 : 1262}px;top:${innerWidth < 760 ? b.yc : b.yr}px"><i class="dot ${a ? '' : 'reserved'}"></i>${FLOOR[f].s === 'PB' ? 'Baixos' : FLOOR[f].s === 'Àtic' ? 'Àtic' : 'Planta ' + FLOOR[f].s}<small>${a} disp.</small></button>`; }).join(''); }
+      $('#e-labs').innerHTML = BANDS.map(b => { const f = b.f, a = HOMES.filter(h => h.floor === f && h.status === 'available').length; return `<button class="lab" data-f="${f}" style="left:${innerWidth < 760 ? 960 : 1292}px;top:${innerWidth < 760 ? b.yc : b.yr}px"><i class="dot ${a ? '' : 'reserved'}"></i>${FLOOR[f].s === 'PB' ? 'Baixos' : FLOOR[f].s === 'Àtic' ? 'Àtic' : 'Planta ' + FLOOR[f].s}<small>${a} disp.</small></button>`; }).join(''); }
     else if (v.k === 'v3') $('#e-labs').innerHTML = `<button class="lab" data-go="aparcament" style="left:800px;top:740px">${ico('car')}Aparcament · planta −1</button><button class="lab" data-go="planta-1" style="left:800px;top:835px">${ico('layers')}Veure les plantes</button>`;
     else $('#e-labs').innerHTML = `<button class="lab" data-go="habitatges" style="left:800px;top:800px">${ico('grid')}Veure els 15 habitatges</button>`; };
-  if (anim && prev){ playTo(prev, draw); } else { $('#e-img').src = eImgSrc(); draw(); }
+  if (anim && prev){ playTo(prev, draw); } else { if (anim) eFade(); else $('#e-img').src = eImgSrc(); draw(); }
   warm(); }
-/* t: 0 tarda · 1 nit · 2 matí */
-const eTod = () => eState.mati ? 2 : eState.night;
-function eGo(v, t, keep){ if (eBusy) return; if (!keep) closeSheet(); const a = VIEWS[eState.v].k, n0 = eState.night, night = t === 1 ? 1 : 0, mati = t === 2 ? 1 : 0; let file = null;
-  if (v !== eState.v) file = vfile(a, VIEWS[v].k, night); else if (night !== n0) file = `video/${a}-${night ? 'night' : 'day'}.mp4`; else if (mati === eState.mati) return;
-  eState = {v, night, mati}; setHash('edifici' + (v ? '-v' + (v+1) : '') + (night ? '-nit' : mati ? '-mati' : ''), true); eRender(!!file, file); }
+/* t: 0 tarda · 1 nit · 2 matí · 3 migdia */
+const eTod = () => eState.night ? 1 : eState.mati ? 2 : eState.mig ? 3 : 0;
+function eGo(v, t, keep){ if (eBusy) return; if (!keep) closeSheet(); const a = VIEWS[eState.v].k, n0 = eState.night, night = t === 1 ? 1 : 0, mati = t === 2 ? 1 : 0, mig = t === 3 ? 1 : 0; let file = null;
+  if (v === eState.v && t === eTod()) return;
+  /* els vídeos de transició són del render antic: amb la vista 1 pel mig es fa una fosa */
+  const novid = a === 'v1' || VIEWS[v].k === 'v1';
+  if (!novid){ if (v !== eState.v) file = vfile(a, VIEWS[v].k, night); else if (night !== n0) file = `video/${a}-${night ? 'night' : 'day'}.mp4`; }
+  eState = {v, night, mati, mig}; setHash('edifici' + (v ? '-v' + (v+1) : '') + (night ? '-nit' : mati ? '-mati' : mig ? '-migdia' : ''), true); if (file) eRender(true, file); else { eRender(true, null); } }
 const eStopAuto = () => { clearInterval(eAuto); eAuto = 0; };
-function eStartAuto(){ eStopAuto(); eAuto = setInterval(() => { if (route.s !== 'edifici'){ eStopAuto(); return; } if (eBusy || sheet.classList.contains('on') || document.hidden) return; eGo(eState.v, [1,2,0][eTod()], true); }, 9000); }
+function eStartAuto(){ eStopAuto(); eAuto = setInterval(() => { if (route.s !== 'edifici'){ eStopAuto(); return; } if (eBusy || sheet.classList.contains('on') || document.hidden) return; eGo(eState.v, [1,2,3,0][eTod()], true); }, 9000); }
 $('#e-dots').onclick = e => { const b = e.target.closest('[data-v]'); b && eGo(+b.dataset.v, eTod()); };
 $('#e-prev').onclick = () => eGo((eState.v+VIEWS.length-1)%VIEWS.length, eTod());
 $('#e-next').onclick = () => eGo((eState.v+1)%VIEWS.length, eTod());
 $('#dn').onclick = e => { const b = e.target.closest('[data-n]'); if (!b) return; if (b.dataset.n === 'a'){ eAuto ? eStopAuto() : eStartAuto(); eRender(false); toast(eAuto ? 'Cicle del dia activat' : 'Cicle del dia aturat'); return; } eStopAuto(); eGo(eState.v, +b.dataset.n); eRender(false); };
 
-/* ---------- cotxes que passen pel carrer (vista 1) ---------- */
-const CARSVG = c => `<svg viewBox="0 0 520 160"><path d="M14 122Q14 96 58 90L132 80Q172 38 244 34H332Q392 38 432 82L484 92Q508 98 508 122V138H14Z" fill="${c}"/><path d="M150 82Q182 50 246 46H284V82ZM296 46H330Q376 50 408 82H296Z" fill="#1d262c" opacity=".85"/><circle cx="118" cy="138" r="30" fill="#15181a"/><circle cx="402" cy="138" r="30" fill="#15181a"/></svg><i class="beam"></i><i class="tail"></i>`;
-function eCar(){ const next = 2600 + Math.random()*4200; setTimeout(eCar, next); if (reduce || route.s !== 'edifici' || eState.v !== 0 || eBusy || document.hidden) return;
-  const far = Math.random() < .45, el = document.createElement('div'); el.className = 'car' + (eState.night ? ' nit' : ''); el.innerHTML = CARSVG(['#e9e6df','#2a2f33','#8a9aa6','#7a2e26','#c9c2b4','#3d5a6c'][Math.floor(Math.random()*6)]);
-  const sc = far ? .66 : 1.25, top = far ? 828 : 836; el.style.top = top + 'px'; el.style.transformOrigin = '0 0'; $('#e-cars').appendChild(el);
-  const from = far ? 1700 : -700, to = far ? -500 : 1900, flip = far ? -1 : 1;
-  el.animate([{transform:`translateX(${from}px) scale(${sc*flip},${sc})`},{transform:`translateX(${to}px) scale(${sc*flip},${sc})`}], {duration:far ? 2600 : 1700, easing:'linear'}).onfinish = () => el.remove(); }
-setTimeout(eCar, 1800);
+/* ---------- vehicles i vianants que passen pel carrer (vista 1) ----------
+   Coordenades de l'escenari 1600×1200. Cada carril és una línia que segueix la perspectiva del carrer;
+   la mida i la velocitat s'escalen amb la distància (el punt de fuga queda cap a y≈705). */
+const LANES = { a:[[1215,770],[1100,812],[780,937],[515,1042],[145,1192],[-260,1352]],   /* carril de la vorera: ve cap a la càmera */
+                c:[[640,1330],[760,1195],[905,1075],[1010,980],[1090,900],[1150,845]],     /* carril de l'arbre: s'allunya */
+                p:[[1085,772],[900,832],[600,928],[200,1072],[-70,1168]] };              /* vorera */
+const eDepth = y => Math.max(.07, (y - 705) / 455);
+function eRun(el, pts, speed, opt = {}){ let i = 0, x = pts[0][0], y = pts[0][1], t0 = 0, life = 0; const total = pts.slice(1).reduce((n, q, j) => n + Math.hypot(q[0]-pts[j][0], q[1]-pts[j][1]), 0); let done = 0;
+  const step = t => { if (!el.isConnected) return; const dt = Math.min(.05, t0 ? (t - t0) / 1000 : 0); t0 = t; life += dt;
+    if (route.s !== 'edifici' || eState.v !== 0){ el.remove(); return; }
+    let d = speed * eDepth(y) * dt; while (d > 0 && i < pts.length - 1){ const q = pts[i+1], L = Math.hypot(q[0]-x, q[1]-y); if (L <= d){ d -= L; done += L; x = q[0]; y = q[1]; i++; } else { x += (q[0]-x)/L*d; y += (q[1]-y)/L*d; done += d; d = 0; } }
+    if (i >= pts.length - 1){ el.remove(); return; }
+    const q = pts[i+1], ang = Math.atan2(q[1]-y, q[0]-x) * 180 / Math.PI, s = eDepth(y) * (opt.k || 1), f = done / total;
+    el.style.opacity = opt.fade ? Math.min(1, f * 12, (1 - f) * 12) : 1;
+    el.style.transform = `translate(${x}px,${y + (opt.bob ? Math.sin(life * 9) * 1.6 * s : 0)}px) scale(${s})`; if (opt.rot) el.style.setProperty('--a', (ang + (opt.back ? 180 : 0)) + 'deg');
+    requestAnimationFrame(step); }; requestAnimationFrame(step); }
+function eCar(){ setTimeout(eCar, 5200 + Math.random() * 7800); if (reduce || route.s !== 'edifici' || eState.v !== 0 || document.hidden) return;
+  const out = Math.random() < .4, el = document.createElement('div'), col = ['#e9e6df','#2a2f33','#8a9aa6','#7a2e26','#c9c2b4','#3d5a6c','#f2f2ef'][Math.floor(Math.random()*7)];
+  el.className = 'veh ' + (out ? 'out' : 'in') + (eState.night ? ' nit' : ''); const r = 'transform:rotate(var(--a,0deg))';
+  el.innerHTML = `<i class="sh" style="${r};transform-origin:260px 50%"></i><i class="hl" style="${r};transform-origin:-150px 122px"></i><i class="sd" style="${r};transform-origin:330px 50%;background:linear-gradient(90deg,transparent,${col} 42%)"></i><i class="tp" style="${r};transform-origin:330px 50%;background:linear-gradient(90deg,transparent,${col} 42%)"></i><i class="gl" style="${r};transform-origin:150px 50%"></i><i class="tl" style="${r};transform-origin:196px 50px"></i><i class="fl" style="${r};transform-origin:-150px 46px"></i>`;
+  $('#e-cars').appendChild(el); eRun(el, out ? LANES.c : LANES.a, 1050 + Math.random() * 260, {rot:1, k:out ? .92 : 1}); }
+function ePed(){ setTimeout(ePed, 16000 + Math.random() * 22000); if (reduce || route.s !== 'edifici' || eState.v !== 0 || document.hidden || $('#e-cars .ped')) return;
+  const el = document.createElement('div'), col = ['#2c3a4a','#5b4a3c','#3f4d3a','#7b2f2a','#d8d2c6','#27292c'][Math.floor(Math.random()*6)], pts = Math.random() < .5 ? LANES.p : [...LANES.p].reverse();
+  el.className = 'ped' + (eState.night ? ' nit' : ''); el.innerHTML = `<i class="ps"></i><i class="pb" style="background:${col}"></i><i class="ph"></i>`;
+  $('#e-cars').prepend(el); eRun(el, pts, 96, {bob:1, fade:1}); }
+setTimeout(eCar, 2200); setTimeout(ePed, 6000); window.__veh = {eCar, ePed};
 
 /* ---------- moviment de perspectiva: paral·laxi amb mapa de profunditat (WebGL) ---------- */
 const PX = {gl:null, tx:0, ty:0, x:0, y:0, dep:{}, ok:false}; window.__px = PX;
@@ -174,7 +200,7 @@ const PX = {gl:null, tx:0, ty:0, x:0, y:0, dep:{}, ok:false}; window.__px = PX;
   const tA = tex(0), tD = tex(1); gl.uniform1i(gl.getUniformLocation(pr, 'a'), 0); gl.uniform1i(gl.getUniformLocation(pr, 'd'), 1); const uo = gl.getUniformLocation(pr, 'o');
   const up = (unit, t, im) => { gl.activeTexture(gl.TEXTURE0+unit); gl.bindTexture(gl.TEXTURE_2D, t); try { gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, im); return true; } catch(e){ return false; } };
   let haveA = false, depFor = '';
-  VIEWS.forEach((o,i) => { const im = new Image(); im.onload = () => { PX.dep[o.k] = im; sync(); }; im.src = `view/d${i+1}.png`; });
+  VIEWS.forEach((o,i) => { if (o.k === 'v1') return; /* el render nou de la vista 1 no té mapa de profunditat */ const im = new Image(); im.onload = () => { PX.dep[o.k] = im; sync(); }; im.src = `view/d${i+1}.png`; });
   function sync(){ const img = $('#e-img'), k = VIEWS[eState.v].k; if (!img.complete || !img.naturalWidth || !PX.dep[k]){ cv.classList.remove('on'); return; } haveA = up(0, tA, img); if (depFor !== k && up(1, tD, PX.dep[k])) depFor = k; PX.ok = haveA && depFor === k; cv.classList.toggle('on', PX.ok); }
   $('#e-img').addEventListener('load', sync); PX.sync = sync;
   $('#e-vp').addEventListener('pointermove', e => { if (e.pointerType !== 'mouse') return; const r = e.currentTarget.getBoundingClientRect(); PX.tx = ((e.clientX-r.left)/r.width-.5)*2; PX.ty = ((e.clientY-r.top)/r.height-.5)*2; PX.m = performance.now(); });
@@ -600,7 +626,7 @@ $('#cform').addEventListener('submit', e => { e.preventDefault(); const n = $('#
 let route = {s:'inici'}, silent = false;
 function setHash(h, replace){ if (location.hash.slice(1) === h) return; silent = true; try { if (replace) history.replaceState(null, '', '#' + h); else location.hash = h; } catch(e){ location.hash = h; } setTimeout(() => silent = false, 0); }
 function parse(){ const p = location.hash.slice(1).toLowerCase().split('-'), s = p[0];
-  if (s === 'edifici'){ const v = p.find(x => /^v[123]$/.test(x)); return {s, v:v ? +v[1]-1 : 0, night:p.includes('nit') ? 1 : 0, mati:p.includes('mati') ? 1 : 0}; }
+  if (s === 'edifici'){ const v = p.find(x => /^v[123]$/.test(x)); return {s, v:v ? +v[1]-1 : 0, night:p.includes('nit') ? 1 : 0, mati:p.includes('mati') ? 1 : 0, mig:p.includes('migdia') ? 1 : 0}; }
   if (s === 'planta'){ const f = p[1] === 'pb' ? 0 : +p[1]; return {s, f:FLOOR[f] ? f : 1}; }
   if (s === 'cfg'){ const hc = byId(p.slice(1,3).join('-')); if (hc && hc.cfg){ location.href = hc.cfg; return {s:'pis', id:hc.id}; } }
   if (s === 'pis' || s === 'cfg'){ const id = p.slice(1,3).join('-'); if (!byId(id)) return {s:'habitatges'}; if (s === 'pis') return {s, id, tab:p[3]};
@@ -619,7 +645,7 @@ function go(){ if (silent) return; const r = route = parse(); closeSheet(); setM
   const light = !['edifici','entorn','sol'].includes(r.s); $('#crumb').className = 'crumb' + (light ? ' inkc' : ''); $('#crumb').textContent = r.s === 'planta' ? FLOOR[r.f].n : r.s === 'pis' ? '' : r.s === 'edifici' ? '' : '';
   document.title = (r.s === 'pis' || r.s === 'cfg' ? byId(r.id).name + (r.s === 'cfg' ? ' · Configurador' : '') : TITLES[r.s]) + ' · Aixovall Residencial';
   requestAnimationFrame(() => {
-    if (r.s === 'edifici'){ eState = {v:r.v, night:r.night, mati:r.mati}; ePZ.fit(); if (window.__enter){ window.__enter = 0; eStartAuto(); } eRender(false); PX.sync && PX.sync(); setTimeout(() => $('#e-hint').style.opacity = 0, 5000); }
+    if (r.s === 'edifici'){ eState = {v:r.v, night:r.night, mati:r.mati, mig:r.mig}; ePZ.fit(); if (window.__enter){ window.__enter = 0; eStartAuto(); } eRender(false); PX.sync && PX.sync(); setTimeout(() => $('#e-hint').style.opacity = 0, 5000); }
     if (r.s === 'planta') pRender(r.f);
     if (r.s === 'habitatges') hRender(); else $('#cmpbar').classList.remove('on');
     if (r.s === 'pis') uRender(byId(r.id), r.tab);

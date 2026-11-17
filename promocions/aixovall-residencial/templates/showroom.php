@@ -105,6 +105,7 @@ axr_head_common( $lang, $axs_t, $axs_d ); ?>
 <symbol id="i-road" viewBox="0 0 24 24"><path d="M8 4 5 20M16 4l3 16M12 5v2M12 11v2M12 17v2"/></symbol>
 <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></symbol>
 <symbol id="i-rocket" viewBox="0 0 24 24"><path d="M12 3c3 2 5 5.500 5 9l-2 3H9l-2-3c0-3.500 2-7 5-9z"/><circle cx="12" cy="10" r="1.800"/><path d="M9 18l-1 3M15 18l1 3M12 18v3"/></symbol>
+<symbol id="i-set" viewBox="0 0 24 24"><path d="M3 18h18M6 18a6 6 0 0 1 12 0M12 4v5M5.500 9.500l1.500 1.500M18.500 9.500 17 11M9.500 6.500 12 9l2.500-2.500"/></symbol>
 <symbol id="i-rise" viewBox="0 0 24 24"><path d="M3 18h18M6 18a6 6 0 0 1 12 0M12 5v4M5.500 9.500l1.500 1.500M18.500 9.500 17 11M9.500 7.500 12 5l2.500 2.500"/></symbol>
 <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></symbol>
 </defs></svg>
@@ -129,9 +130,10 @@ axr_head_common( $lang, $axs_t, $axs_d ); ?>
     <span class="crumb" id="crumb"></span>
     <span class="sp"></span>
     <div class="tabs" id="pis-tabs" hidden></div>
-    <div class="dn" id="dn" hidden role="group" aria-label="Dia o nit">
+    <div class="dn" id="dn" hidden role="group" aria-label="Moment del dia">
       <button data-n="2" aria-label="Matí" title="Matí"><svg class="i"><use href="#i-rise"/></svg></button>
-      <button data-n="0" aria-label="Tarda" title="Tarda"><svg class="i"><use href="#i-sun"/></svg></button>
+      <button data-n="3" aria-label="Migdia" title="Migdia"><svg class="i"><use href="#i-sun"/></svg></button>
+      <button data-n="0" aria-label="Tarda" title="Tarda"><svg class="i"><use href="#i-set"/></svg></button>
       <button data-n="1" aria-label="Nit" title="Nit"><svg class="i"><use href="#i-moon"/></svg></button>
       <button data-n="a" aria-label="Cicle automàtic del dia" title="Cicle automàtic"><svg class="i"><use href="#i-play"/></svg></button>
     </div>
@@ -153,7 +155,7 @@ axr_head_common( $lang, $axs_t, $axs_d ); ?>
     <button class="pill dark round navarrow r" id="e-next" aria-label="Vista següent"><svg class="i"><use href="#i-r"/></svg></button>
     <div class="side bl"><button class="pill dark round" data-z="1.35" aria-label="Apropar"><svg class="i"><use href="#i-plus"/></svg></button><button class="pill round" data-z="0.74" aria-label="Allunyar"><svg class="i"><use href="#i-minus"/></svg></button></div>
     <div class="dock" id="dock"><button data-info="obra"><svg class="i"><use href="#i-crane"/></svg>Obra</button><button data-info="pagaments"><svg class="i"><use href="#i-info"/></svg>Pagaments</button><button data-info="financ"><svg class="i"><use href="#i-chat"/></svg>Finançament</button><button data-go="aparcament"><svg class="i"><use href="#i-car"/></svg>Aparcament</button><button data-go="entorn"><svg class="i"><use href="#i-pin"/></svg>Entorn</button><button data-go="sol"><svg class="i"><use href="#i-sun"/></svg>Sol</button></div>
-    <div class="pill sm hint" id="e-hint">Toca una planta · mou el cursor per canviar l’angle</div>
+    <div class="pill sm hint" id="e-hint">Toca una planta per veure’n els habitatges</div>
   </section>
 
   <!-- PLANTA -->

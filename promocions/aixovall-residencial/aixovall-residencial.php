@@ -10,7 +10,7 @@
  */
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
-define( 'AXR_VERSION', '4.2.0-beta.2' );
+define( 'AXR_VERSION', '4.3.0-beta.1' );
 define( 'AXR_FILE', __FILE__ );
 define( 'AXR_DIR', plugin_dir_path( __FILE__ ) );
 define( 'AXR_URL', plugin_dir_url( __FILE__ ) );
