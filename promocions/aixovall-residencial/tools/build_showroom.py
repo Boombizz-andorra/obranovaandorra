@@ -156,6 +156,8 @@ axr_head_common( $lang, $axs_t, $axs_d ); ?>
  if (cur !== 'ca' || s || /bot|crawl|spider|slurp|lighthouse|headless/i.test(navigator.userAgent)) return;
  var b = ((navigator.languages && navigator.languages[0]) || navigator.language || '').slice(0, 2).toLowerCase();
  if (b !== 'ca' && L[b]) location.replace(L[b] + location.hash); })();</script>
+<script>/* Amb <base> cap als recursos, un replaceState('#…') canviaria l'adreça a la carpeta d'assets: es manté sempre la de la pàgina. */
+(function(){ var H = history; ['pushState', 'replaceState'].forEach(function(m){ var o = H[m]; H[m] = function(s, t, u){ if (typeof u === 'string' && u.charAt(0) === '#') u = location.pathname + location.search + u; return o.call(H, s, t, u); }; }); })();</script>
 <base href="<?php echo esc_url( $axs_base ); ?>">
 <link rel="stylesheet" href="<?php echo esc_url( $axs_base . 'showroom.css?v=' . axr_ver( 'sr/showroom.css' ) ); ?>">
 </head>

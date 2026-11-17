@@ -278,6 +278,7 @@ function axr_admin_settings() {
 	echo '</form>';
 
 	axr_admin_hub_section();
+	if ( function_exists( 'axr_admin_media_section' ) ) { axr_admin_media_section(); }
 
 	$video = axr_asset_exists( 'video/intro-720.mp4' );
 	echo '<h2>Paquete de medios</h2><div class="axr-card"><p>Estado del vídeo de portada: <strong>' . ( $video ? 'instalado' : 'no instalado (la portada muestra la imagen fija)' ) . '</strong>.</p>';

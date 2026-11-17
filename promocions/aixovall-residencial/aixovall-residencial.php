@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Aixovall Residencial
  * Description: Pàgina de la promoció Aixovall Residencial en 4 idiomes, configurador d'acabats per habitatge i panell per gestionar preus, reserves i opcions.
- * Version: 4.0.0-beta.2
+ * Version: 4.0.0-beta.3
  * Requires at least: 6.0
  * Requires PHP: 7.4
  * Author: API Immobiliària
@@ -10,7 +10,7 @@
  */
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
-define( 'AXR_VERSION', '4.0.0-beta.2' );
+define( 'AXR_VERSION', '4.0.0-beta.3' );
 define( 'AXR_FILE', __FILE__ );
 define( 'AXR_DIR', plugin_dir_path( __FILE__ ) );
 define( 'AXR_URL', plugin_dir_url( __FILE__ ) );
@@ -32,6 +32,7 @@ require_once AXR_DIR . 'inc/i18n.php';
 require_once AXR_DIR . 'inc/router.php';
 require_once AXR_DIR . 'inc/leads.php';
 require_once AXR_DIR . 'inc/dossier.php'; /* v3.4: dossier PDF + WhatsApp (Make) */
+require_once AXR_DIR . 'inc/media.php'; /* v4.1: imatges del configurador des d'apimi.com */
 if ( is_admin() ) {
 	require_once AXR_DIR . 'inc/admin.php';
 }
