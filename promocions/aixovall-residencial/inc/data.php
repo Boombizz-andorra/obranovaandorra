@@ -158,7 +158,7 @@ function axr_default_settings() {
 		'cfg_section'  => 1,
 		'lead_form'    => 1,
 		'updated'      => '2026-09-30',
-		'showroom'     => 0, /* v4: 1 = la pàgina pública és el showroom nou */
+		'showroom'     => 1, /* v4: 1 = la pàgina pública és el showroom nou (per defecte a obranovaandorra.com) */
 	);
 }
 
