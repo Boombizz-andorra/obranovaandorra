@@ -1,0 +1,31 @@
+/* Aixovall Residencial · v3.4 · porta d'accés al resum i caixa del dossier */
+.gate{display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,420px);grid-template-areas:"total total" "preview form";gap:22px 28px;align-items:start}
+.gate-total{grid-area:total}.gate-preview{grid-area:preview}.gate-form{grid-area:form}
+.gate-preview{position:relative;display:grid;gap:14px;min-width:0}
+.gate-preview .minis{filter:blur(2.5px) saturate(.9);opacity:.85;pointer-events:none}
+.gate-blur{filter:blur(4px);opacity:.55;pointer-events:none;user-select:none}
+.gate-total{display:flex;justify-content:space-between;align-items:baseline;gap:12px;background:#fff;border:1px solid var(--line);padding:14px 18px}
+.gate-total span{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.gate-total b{font-size:24px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--api-ink);background:#fde9da;padding:2px 10px}
+.gate-form{position:sticky;top:138px}
+.gate-form .axc-btn.axc-primary{width:100%;justify-content:center;font-size:15px;min-height:54px}
+.gate-form .axc-btn.axc-primary svg{flex:none}
+.gate-form .msg{min-height:0}
+.gate-fine{font-size:12px;color:#d2d5cc;text-align:center;margin:0}
+.dossier{background:var(--green);color:#f5f3eb;padding:26px 28px;display:grid;gap:18px}
+.dossier .eyebrow{color:#f5c9a8}
+.dossier h3{font:400 24px/1.15 Georgia,serif;letter-spacing:-.03em;color:#fff}
+.dossier p{color:#d2d5cc;font-size:14px;min-height:20px}
+.dossier .actions .axc-btn{flex:1 1 220px}
+.dossier .axc-btn.axc-wa{background:#fff;color:#1f3d36;border-color:#fff}
+.dossier .axc-btn.axc-wa:hover{background:#e6eee9}
+@media(max-width:900px){
+ .gate{grid-template-columns:minmax(0,1fr);grid-template-areas:"total" "form" "preview";gap:16px}
+ .gate-form{position:static}
+ .gate-preview .minis{grid-template-columns:repeat(4,1fr);gap:6px}
+ .gate-total b{font-size:20px}
+ .dossier{padding:20px}
+}
+.dossier .actions .axc-btn.axc-wa{background:#25a35a;border-color:#25a35a;color:#fff;font-size:15px;min-height:54px;flex:2 1 260px}
+.dossier .actions .axc-btn.axc-wa:hover{background:#1f8c4d;border-color:#1f8c4d}
+.dossier .actions .axc-btn.axc-wa.is-off{opacity:.55;cursor:progress}

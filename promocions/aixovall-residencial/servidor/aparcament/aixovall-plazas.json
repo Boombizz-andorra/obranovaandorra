@@ -1,0 +1,156 @@
+[
+ {
+  "referencia": "P1",
+  "nombre": "Plaça 1",
+  "modalidad": "individual",
+  "plazas": "1",
+  "precio": 38000,
+  "orden": 0,
+  "zona": {
+   "x": 20.72,
+   "y": 69.11,
+   "w": 15.09,
+   "h": 22.29
+  }
+ },
+ {
+  "referencia": "P2-3",
+  "nombre": "Plaça doble 2-3",
+  "modalidad": "doble",
+  "plazas": "2,3",
+  "precio": 68000,
+  "orden": 1,
+  "zona": {
+   "x": 2.7,
+   "y": 46.02,
+   "w": 15.77,
+   "h": 43.79
+  }
+ },
+ {
+  "referencia": "P4",
+  "nombre": "Plaça 4",
+  "modalidad": "individual",
+  "plazas": "4",
+  "precio": 38000,
+  "orden": 2,
+  "zona": {
+   "x": 2.7,
+   "y": 34.87,
+   "w": 32.66,
+   "h": 11.15
+  }
+ },
+ {
+  "referencia": "P5",
+  "nombre": "Plaça 5",
+  "modalidad": "individual",
+  "plazas": "5",
+  "precio": 38000,
+  "orden": 3,
+  "zona": {
+   "x": 2.7,
+   "y": 23.73,
+   "w": 32.66,
+   "h": 11.15
+  }
+ },
+ {
+  "referencia": "P6",
+  "nombre": "Plaça 6",
+  "modalidad": "individual",
+  "plazas": "6",
+  "precio": 38000,
+  "orden": 4,
+  "zona": {
+   "x": 2.7,
+   "y": 12.58,
+   "w": 32.66,
+   "h": 11.15
+  }
+ },
+ {
+  "referencia": "P7",
+  "nombre": "Plaça 7",
+  "modalidad": "individual",
+  "plazas": "7",
+  "precio": 38000,
+  "orden": 5,
+  "zona": {
+   "x": 2.7,
+   "y": 1.43,
+   "w": 32.66,
+   "h": 11.15
+  }
+ },
+ {
+  "referencia": "P8-9",
+  "nombre": "Plaça doble 8-9",
+  "modalidad": "doble",
+  "plazas": "8,9",
+  "precio": 68000,
+  "orden": 6,
+  "zona": {
+   "x": 65.09,
+   "y": 45.54,
+   "w": 32.66,
+   "h": 22.45
+  }
+ },
+ {
+  "referencia": "P10",
+  "nombre": "Plaça 10",
+  "modalidad": "individual",
+  "plazas": "10",
+  "precio": 38000,
+  "orden": 7,
+  "zona": {
+   "x": 65.09,
+   "y": 34.87,
+   "w": 32.66,
+   "h": 10.67
+  }
+ },
+ {
+  "referencia": "P11",
+  "nombre": "Plaça 11",
+  "modalidad": "individual",
+  "plazas": "11",
+  "precio": 38000,
+  "orden": 8,
+  "zona": {
+   "x": 65.09,
+   "y": 23.73,
+   "w": 32.66,
+   "h": 11.15
+  }
+ },
+ {
+  "referencia": "P12",
+  "nombre": "Plaça 12",
+  "modalidad": "individual",
+  "plazas": "12",
+  "precio": 38000,
+  "orden": 9,
+  "zona": {
+   "x": 65.09,
+   "y": 12.58,
+   "w": 32.66,
+   "h": 11.15
+  }
+ },
+ {
+  "referencia": "P13",
+  "nombre": "Plaça 13",
+  "modalidad": "individual",
+  "plazas": "13",
+  "precio": 38000,
+  "orden": 10,
+  "zona": {
+   "x": 65.09,
+   "y": 1.43,
+   "w": 32.66,
+   "h": 11.15
+  }
+ }
+]

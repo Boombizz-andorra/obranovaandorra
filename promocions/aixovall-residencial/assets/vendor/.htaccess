@@ -1,0 +1,4 @@
+# Aixovall Residencial: fitxers del dossier llegibles des d'apimi.com
+<IfModule mod_headers.c>
+Header set Access-Control-Allow-Origin "*"
+</IfModule>
