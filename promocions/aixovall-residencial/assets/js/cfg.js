@@ -76,7 +76,10 @@ try { apply(JSON.parse(localStorage.getItem(STORE) || 'null')); } catch (e) {}
 const b64e = s => btoa(unescape(encodeURIComponent(s))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 const b64d = s => decodeURIComponent(escape(atob(s.replace(/-/g, '+').replace(/_/g, '/'))));
 /* v2.5.1: «&p=…» ve de l'enllaç «Descargar PDF» d'una sol·licitud: dades del client i PDF directe, sense tornar a enviar res. */
-let ADMIN_PDF = false;
+/* v4.1 · agent del Hub amb sessió (galeta axr_ag_on): resum directe, sense formulari, sense WhatsApp ni avisos al client. */
+const AGENT = /(?:^|;\s*)axr_ag_on=1/.test(document.cookie);
+if (AGENT) document.documentElement.classList.add('ag-on');
+let ADMIN_PDF = AGENT;
 try {
   const m = location.hash.match(/[#&]c=([A-Za-z0-9_-]+)/);
   const q = location.hash.match(/[#&]p=([A-Za-z0-9_-]+)/);
@@ -305,7 +308,7 @@ function renderSummary() {
   if (!leadOk()) { renderGate(); return; }
   if (!minisBuilt) {
     p.innerHTML = `<div class="phead"><span class="eyebrow">${tr('step', { n: STEPS.length })} · Aixovall Residencial</span><h2>${tr('sum_title')}</h2></div>
-      <div class="minis" id="minis"></div><div id="sumBody" style="display:grid;gap:30px"></div>
+      <div id="agPanel"></div><div class="minis" id="minis"></div><div id="sumBody" style="display:grid;gap:30px"></div>
       <div class="legal"><p><b>${tr('legal_img_t')}</b> ${tr('legal_img')}</p><p><b>${tr('legal_amt_t')}</b> ${tr('legal_amt', { r: igiPct() })}</p></div>
       <section class="dossier" id="dossier" aria-live="polite"><div class="dos-head"><span class="eyebrow">${esc(gt('d_eye'))}</span><h3>${esc(gt('d_t', { home: HOME.name }))}</h3><p id="dosMsg">${esc(gt(DOS.busy ? 'd_wait' : 'd_ready'))}</p></div>
         <div class="actions"><a class="axc-btn axc-wa is-off" id="dosWa" href="#" target="_blank" rel="noopener" data-place="dossier" aria-disabled="true">${WA_ICON}${esc(gt('d_get'))}</a><button type="button" class="axc-btn axc-ghost" id="pdf">${esc(gt('d_dl'))} ↓</button></div></section>
@@ -323,6 +326,7 @@ function renderSummary() {
       location.href = A.self;
     });
     wireDossier(); minisBuilt = true;
+    if (A.agentPanel) A.agentPanel($('agPanel'));
   }
   const anx = ['PA', 'TR'].filter(k => !isNone(op(k)));
   $('sumBody').innerHTML = `
@@ -535,7 +539,7 @@ async function uploadDossier(blob) {
   const j = await r.json(); if (!j || !j.ok) throw new Error('upload'); return j;
 }
 function waReady() { const wa = $('dosWa'); if (!wa) return; const on = !DOS.busy && (leadSent || ADMIN_PDF); wa.classList.toggle('is-off', !on); wa.setAttribute('aria-disabled', String(!on)); }
-let leadSent = false;
+let leadSent = AGENT;
 async function sendLead(extra) {
   if (!A.lead || leadSent || ADMIN_PDF) return true;
   const lead = S.lead || {}; let utm = null; try { utm = JSON.parse(localStorage.getItem('ax_utm') || 'null'); } catch (e) {}
@@ -1023,7 +1027,15 @@ function ishowiIntro(badge, done, key) {
 }
 
 const ishwTop = ishowiBadge(document.querySelector('.axc-top'));
-ishowiIntro(ishwTop, () => { if (ADMIN_PDF) { leadSent = true; setTimeout(() => runDossier(true), 300); } else if (STEPS[S.paso].id === 'resumen') { if (leadOk()) reserveNotice(); } else introNotice(); });
+ishowiIntro(ishwTop, () => { if (AGENT) { /* agent: sense avisos de client */ } else if (ADMIN_PDF) { leadSent = true; setTimeout(() => runDossier(true), 300); } else if (STEPS[S.paso].id === 'resumen') { if (leadOk()) reserveNotice(); } else introNotice(); });
+/* v4.1 · mode agent: estat actual per desar-lo com a configuració provisional al Hub (assets/agent/agent-cfg.js) */
+/* Agent del Hub amb sessió: sense formulari de contacte ni enviament de sol·licitud (com l'administrador); el dossier es genera directament. */
+A.setAgent = () => { ADMIN_PDF = true; leadSent = true; document.documentElement.classList.add('ag-on'); try { if (STEPS[S.paso].id === 'resumen') renderSummary(); } catch (e) {} };
+A.isAgent = AGENT;
+A.agentState = () => ({
+  lines: KEYS.filter(k => !grp(k).annex).map(k => { const o = op(k); return { key: k, codigo: o.id, nombre: optName(o), importe: amount(k), inclos: isNone(o) || amount(k) === 0 }; }),
+  plaza: S.plaza || '', mods: S.mods ? { total: modsTotal() } : null, total: totalCfg(), enlace: shareUrl()
+});
 })();
 
 
@@ -1513,11 +1525,4 @@ if (form) {
     msg.append(p, acts);
   });
 }
-/* v4.1 · mode agent: estat actual per desar-lo com a configuració provisional al Hub (assets/agent/agent-cfg.js) */
-/* Agent del Hub amb sessió: sense formulari de contacte ni enviament de sol·licitud (com l'administrador); el dossier es genera directament. */
-A.setAgent = () => { ADMIN_PDF = true; leadSent = true; document.body.classList.add('ag-on'); try { if (STEPS[S.paso].id === 'resumen') renderSummary(); } catch (e) {} };
-A.agentState = () => ({
-  lines: KEYS.filter(k => !grp(k).annex).map(k => { const o = op(k); return { key: k, codigo: o.id, nombre: optName(o), importe: amount(k), inclos: isNone(o) || amount(k) === 0 }; }),
-  plaza: S.plaza || '', mods: S.mods ? { total: modsTotal() } : null, total: totalCfg(), enlace: shareUrl()
-});
 })();

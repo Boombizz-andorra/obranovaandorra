@@ -163,6 +163,7 @@ add_action( 'rest_api_init', function () {
 	$r( 'POST', 'comprador', function ( $q ) { return axr_ag_api_fwd( $q, 'comprador', array( 'referencia', 'nombre', 'documento', 'email', 'telefono', 'direccion', 'otros_compradores', 'idioma' ) ); } );
 	$r( 'POST', 'configuracio', function ( $q ) { return axr_ag_api_fwd( $q, 'configuracion', array( 'referencia', 'lineas', 'resumen', 'enlace', 'total' ) ); } );
 	$r( 'POST', 'document', 'axr_ag_api_doc_up' );
+	$r( 'POST', 'pago', 'axr_ag_api_doc_up' ); // justificant de pagament d'una fita (cargo_id)
 	$r( 'GET', 'document', 'axr_ag_api_doc_down' );
 	$r( 'POST', 'contracte', 'axr_ag_api_contract' );
 	$r( 'GET', 'descarregable', 'axr_ag_api_file' );
@@ -210,8 +211,9 @@ function axr_ag_api_doc_up( WP_REST_Request $req ) {
 	if ( (int) $f['size'] > 10 * 1024 * 1024 ) { return axr_ag_err( 'El fitxer passa de 10 MB.' ); }
 	$mime = function_exists( 'finfo_open' ) ? finfo_file( finfo_open( FILEINFO_MIME_TYPE ), $f['tmp_name'] ) : (string) $f['type'];
 	if ( ! in_array( $mime, array( 'application/pdf', 'image/jpeg', 'image/png' ), true ) ) { return axr_ag_err( 'Format no admès: puja un PDF, JPG o PNG.' ); }
-	return axr_ag_from_hub( axr_ag_hub( 'POST', 'documentos', array(
-		'__multipart' => array( 'referencia' => (string) $req->get_param( 'referencia' ), 'tipo' => (string) $req->get_param( 'tipo' ), 'fase' => (string) $req->get_param( 'fase' ) ),
+	$pago = null !== $req->get_param( 'cargo_id' );
+	return axr_ag_from_hub( axr_ag_hub( 'POST', $pago ? 'pago' : 'documentos', array(
+		'__multipart' => $pago ? array( 'referencia' => (string) $req->get_param( 'referencia' ), 'cargo_id' => (string) (int) $req->get_param( 'cargo_id' ) ) : array( 'referencia' => (string) $req->get_param( 'referencia' ), 'tipo' => (string) $req->get_param( 'tipo' ), 'fase' => (string) $req->get_param( 'fase' ) ),
 		'__file'      => array( $f['tmp_name'], sanitize_file_name( $f['name'] ), $mime ),
 	), $s['token'] ) );
 }
@@ -525,6 +527,7 @@ function axr_ag_boot( $lang ) {
 function axr_agent_assets( $lang ) {
 	echo '<script>window.AXA_BOOT=' . wp_json_encode( axr_ag_boot( $lang ), JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP ) . ';</script>' . "\n";
 	echo '<link rel="stylesheet" href="' . esc_url( AXR_URL . 'assets/agent/agent.css?v=' . axr_ver( 'agent/agent.css' ) ) . '">' . "\n";
+	echo '<script src="' . esc_url( AXR_URL . 'assets/agent/agent-flow.js?v=' . axr_ver( 'agent/agent-flow.js' ) ) . '"></script>' . "\n";
 	echo '<script src="' . esc_url( AXR_URL . 'assets/agent/agent.js?v=' . axr_ver( 'agent/agent.js' ) ) . '"></script>' . "\n";
 }
 
@@ -534,5 +537,6 @@ function axr_agent_cfg_assets( $home ) {
 	$b = axr_ag_boot( 'ca' ) + array( 'home' => $home['id'], 'back' => axr_url( 'ca' ) . '#pis-' . strtolower( $home['id'] ) );
 	echo '<script>window.AXA_BOOT=' . wp_json_encode( $b, JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP ) . ';</script>' . "\n";
 	echo '<link rel="stylesheet" href="' . esc_url( AXR_URL . 'assets/agent/agent.css?v=' . axr_ver( 'agent/agent.css' ) ) . '">' . "\n";
+	echo '<script src="' . esc_url( AXR_URL . 'assets/agent/agent-flow.js?v=' . axr_ver( 'agent/agent-flow.js' ) ) . '" defer></script>' . "\n";
 	echo '<script src="' . esc_url( AXR_URL . 'assets/agent/agent-cfg.js?v=' . axr_ver( 'agent/agent-cfg.js' ) ) . '" defer></script>' . "\n";
 }

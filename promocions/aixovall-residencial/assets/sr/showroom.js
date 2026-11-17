@@ -314,10 +314,11 @@ function apRender(anim = true){ const ids = apIds(), dbl = ids.length > 1, label
   $('#ap-pa').textContent = eur(38000); $('#ap-pb').textContent = eur(68000); $('#ap-tr').textContent = eur(10000);
   $('#ap-wa').href = `https://wa.me/${PHONE}?text=${encodeURIComponent(`Hola, m’interessa ${dbl ? 'la plaça doble ' : 'la plaça '}${label} de l’aparcament d’Aixovall Residencial. Està disponible?`)}`;
   $('#ap-hint').textContent = `${dbl ? 'Plaça doble ' : 'Plaça '}${label} · toca’n una altra`; }
-function apSet(p, t){ if (p) AP.p = p; if (t) AP.t = t; setHash(`aparcament-${AP.p.toLowerCase()}${AP.t === 'B' ? '-doble' : ''}`, true); apRender(true); }
+function apSet(p, t){ if (p) AP.p = p; if (t) AP.t = t; if (PKPAIR[AP.p]) AP.t = 'B'; else if (AP.t === 'B') AP.t = 'A'; // una plaça d'una doble sempre és la doble; una de simple, simple
+  setHash(`aparcament-${AP.p.toLowerCase()}${AP.t === 'B' ? '-doble' : ''}`, true); apRender(true); }
 $('#ap-plan').addEventListener('click', e => { const g = e.target.closest('[data-pk]'); if (g && !g.classList.contains('off')) apSet(g.dataset.pk); });
 $('#ap-plan').addEventListener('keydown', e => { const g = e.target.closest('[data-pk]'); if (g && (e.key === 'Enter' || e.key === ' ')){ e.preventDefault(); if (!g.classList.contains('off')) apSet(g.dataset.pk); } });
-$('#ap-type').addEventListener('click', e => { const b = e.target.closest('[data-t]'); if (!b) return; let p = AP.p; if (b.dataset.t === 'B' && !PKPAIR[p]) p = 'P8'; apSet(p, b.dataset.t); });
+$('#ap-type').addEventListener('click', e => { const b = e.target.closest('[data-t]'); if (!b) return; let p = AP.p; if (b.dataset.t === 'B' && !PKPAIR[p]) p = 'P8'; if (b.dataset.t === 'A' && PKPAIR[p]) p = 'P5'; apSet(p, b.dataset.t); });
 $('#ap-replay').onclick = () => apRender(true);
 /* ================= FINANÇAMENT · MoraBanc (demo): pòlissa d'obra nova del sostre al notari + hipoteca ================= */
 // entitat de la demo: Creand per defecte; l'enllaç #morabanc la canvia durant la visita
@@ -622,7 +623,7 @@ function go(){ if (silent) return; const r = route = parse(); closeSheet(); setM
     if (r.s === 'cfg') cRender(byId(r.id), r.step, r.c);
     if (r.s === 'entorn'){ if (!$('#en-svg').childElementCount) enBuild(); enRocket(); }
     if (r.s === 'sol'){ SO = {m:r.m, h:r.h}; soRender(); so3dInit(); }
-    if (r.s === 'aparcament'){ AP = {p:r.p, t:r.t}; apRender(true); }
+    if (r.s === 'aparcament'){ AP = {p:r.p, t:PKPAIR[r.p] ? 'B' : 'A'}; apRender(true); }
   }); }
 /* init */
 $('#app').hidden = false;

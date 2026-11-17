@@ -96,6 +96,11 @@ css += """
 # missatge del formulari de contacte en l'idioma de la pàgina
 js = patch(js, "`Hola, soc ${n}. ${m || 'M’interessa Aixovall Residencial.'}`", "`${(window.axsTr || (t => t))('Hola, soc')} ${n}. ${m || (window.axsTr || (t => t))('M’interessa Aixovall Residencial.')}`", 'missatge de contacte traduït')
 js = patch(js, "$('#u-price').textContent = pv(h, h.price);", "$('#u-price').innerHTML = pv(h, h.price);", 'preu de la fitxa amb format (aparaulat difuminat)')
+# ---------- v4.1: les places dobles (P2+P3, P8+P9) no es venen per separat ----------
+js = patch(js, "function apSet(p, t){ if (p) AP.p = p; if (t) AP.t = t; setHash(",
+    "function apSet(p, t){ if (p) AP.p = p; if (t) AP.t = t; if (PKPAIR[AP.p]) AP.t = 'B'; else if (AP.t === 'B') AP.t = 'A'; // una plaça d'una doble sempre és la doble; una de simple, simple\n  setHash(", 'places dobles inseparables (tria)')
+js = patch(js, "if (b.dataset.t === 'B' && !PKPAIR[p]) p = 'P8'; apSet(p, b.dataset.t); });", "if (b.dataset.t === 'B' && !PKPAIR[p]) p = 'P8'; if (b.dataset.t === 'A' && PKPAIR[p]) p = 'P5'; apSet(p, b.dataset.t); });", 'places dobles inseparables (tipus)')
+js = patch(js, "if (r.s === 'aparcament'){ AP = {p:r.p, t:r.t}; apRender(true); }", "if (r.s === 'aparcament'){ AP = {p:r.p, t:PKPAIR[r.p] ? 'B' : 'A'}; apRender(true); }", 'places dobles inseparables (enllaç)')
 # ---------- v4.1: ganxos per al mode agent (assets/agent/agent.js) ----------
 js = patch(js, "  $('#u-cfg').hidden = !cfgOK(h); }", "  $('#u-cfg').hidden = !cfgOK(h); window.AXA && AXA.unit && AXA.unit(h); }", 'ganxo agent a la fitxa del pis')
 js = patch(js, '<span class="btn" style="opacity:.45">Configurador aviat</span>`}</div>`; }', '<span class="btn" style="opacity:.45">Configurador aviat</span>`}</div>${window.AXA && AXA.sheet ? AXA.sheet(h) : \'\'}`; }', 'ganxo agent al full del pis')

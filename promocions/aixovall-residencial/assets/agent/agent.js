@@ -84,7 +84,7 @@ function login(msg){
 function units(){
   const mine = S.viviendas.filter(v => v.mia);
   sheet(`<div class="sh-h"><h2>Les meves unitats</h2></div><p class="sub">${esc(S.promocion.nombre)} · ${mine.length ? mine.length + ' en curs' : 'cap operació en curs'}</p>
-  ${mine.length ? `<ul class="ag-list">${mine.map(v => `<li><button data-ag-unit="${esc(v.referencia)}"><b>${esc(homeName(v.referencia))}</b><span class="ag-st ag-${esc(v.fase)}">${esc(v.estado_txt || FTXT[v.fase])}</span><small>${v.operacion && v.operacion.comprador ? esc(v.operacion.comprador.nombre) : ''}</small></button></li>`).join('')}</ul>` : '<p class="note">Quan aparaulis o reservis un habitatge, el trobaràs aquí.</p>'}
+  ${mine.length ? `<ul class="ag-list">${mine.map(v => `<li><button data-ag-unit="${esc(v.referencia)}"><b>${esc(homeName(v.referencia))}</b><span class="ag-st ag-${esc(v.fase)}">${esc((window.AXFLOW && AXFLOW.est(v)) || FTXT[v.fase])}</span><small>${v.operacion && v.operacion.comprador ? esc(v.operacion.comprador.nombre) : ''}</small></button></li>`).join('')}</ul>` : '<p class="note">Quan aparaulis o reservis un habitatge, el trobaràs aquí.</p>'}
   <h3>Disponibles</h3><ul class="ag-list">${S.viviendas.filter(v => v.fase === 'disponible').map(v => `<li><button data-ag-unit="${esc(v.referencia)}"><b>${esc(homeName(v.referencia))}</b><span class="ag-st ag-disponible">Disponible</span><small>${eur(v.precio)}</small></button></li>`).join('') || '<li class="note">No en queda cap.</li>'}</ul>`);
 }
 function files(){
@@ -142,12 +142,14 @@ function buyerForm(v, verb, onok){
 function pane(b, v){
   const p = b.querySelector('#ag-pane'), op = v.operacion || {};
   if (curTab === 'resum'){
-    p.innerHTML = `<dl class="ag-dl"><div><dt>Estat al Hub</dt><dd>${esc(v.estado_txt)}${v.estado_interno === 'bloqueo' && v.bloqueo_hasta ? `<small>Caduca el ${esc(hasta(v.bloqueo_hasta))} si no es puja el contracte de reserva</small>` : ''}</dd></div>
+    p.innerHTML = (window.AXFLOW ? `<div class="axf">${AXFLOW.render(v, S)}</div>` : '') + `<dl class="ag-dl"><div><dt>Estat al Hub</dt><dd>${esc((window.AXFLOW && AXFLOW.est(v)) || v.estado_txt)}${v.estado_interno === 'bloqueo' && v.bloqueo_hasta ? `<small>Caduca el ${esc(hasta(v.bloqueo_hasta))} si no es puja el contracte de reserva</small>` : ''}</dd></div>
     <div><dt>Preu total</dt><dd>${eur(op.precio_total)}<small>${op.precio_anexos ? 'Habitatge ' + eur(op.precio_contractual) + ' + plaça ' + eur(op.precio_anexos) : 'Sense annexos'} · sense IGI</small></dd></div>
     <div><dt>Reserva</dt><dd>${eur(op.reserva_importe)}</dd></div><div><dt>Arres (10 %)</dt><dd>${eur(op.arras_total)}<small>Pendent de transferir: ${eur(op.arras_transferencia)}</small></dd></div>
     <div><dt>Comprador</dt><dd>${esc(op.comprador ? op.comprador.nombre : '—')}</dd></div><div><dt>Registrat per</dt><dd>${esc(op.registrado_por || '')}</dd></div></dl>
     <div class="ag-acts two">${v.estado_interno === 'bloqueo' ? `<button class="btn" data-go="documents">${ico('up')}Reservar: pujar contracte</button><button class="btn ghost" id="ag-free">Alliberar</button>` : `<button class="btn" data-go="documents">Documents</button><button class="btn ghost" data-go="contracte">Contracte de reserva</button>`}</div>`;
     p.querySelectorAll('[data-go]').forEach(x => x.onclick = () => b.querySelector(`[data-tab="${x.dataset.go}"]`).click());
+    if (window.AXFLOW) AXFLOW.bind(p, v, { api, done: async (m, refreshNow) => { toast(m); if (refreshNow) await refresh('resum'); },
+      act: n => { if (n === 'contracte') b.querySelector('[data-tab="contracte"]').click(); if (n === 'alliberar') { const fr = p.querySelector('#ag-free'); fr && fr.click(); } } });
     const fr = p.querySelector('#ag-free'); if (fr) fr.onclick = () => { if (confirm('Alliberar ' + homeName(v.referencia) + '? Tornarà a estar disponible per a tothom.')) run(fr, async () => { await api('alliberar', { json: { referencia: v.referencia } }); toast('Habitatge alliberat'); closeSheet(); await load(); }); };
   }
   if (curTab === 'comprador'){
@@ -227,5 +229,10 @@ if (err){
   history.replaceState(null, '', location.pathname + location.hash); setTimeout(() => login(M[err] || 'No s’ha pogut entrar amb Google.'), 600);
 }
 menu();
-if (B.hub && /(?:^|;\s*)axr_ag_on=1/.test(document.cookie)) load().then(s => { if (s && /habitatges/.test(location.hash)) toast('Mode agent actiu · ' + s.actor.nombre); });
+if (B.hub && /(?:^|;\s*)axr_ag_on=1/.test(document.cookie)) load().then(s => {
+  if (!s) return;
+  const ag = q.get('ag'), m = location.hash.match(/^#pis-([a-z0-9]+-[a-z0-9]+)/i);
+  if (ag && m){ history.replaceState(null, '', location.pathname + location.hash); setTimeout(() => panel(m[1].toUpperCase().replace(/^(\d+)-/, '$1-'), ag), 900); }
+  else if (/habitatges/.test(location.hash)) toast('Mode agent actiu · ' + s.actor.nombre);
+});
 })();
