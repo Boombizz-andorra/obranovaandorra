@@ -316,7 +316,7 @@ function axr_ag_contract_defaults( $actor ) {
 		'nrt'          => $pick( array( 'nrt', 'nif', 'fiscal_nif', 'cif' ) ),
 		'domicili'     => $pick( array( 'direccion_fiscal', 'fiscal_direccion', 'domicilio', 'direccion' ) ),
 		'poblacio'     => $pick( array( 'poblacion', 'parroquia' ) ),
-		'representant' => $pick( array( 'representante' ) ),
+		'representant' => $pick( array( 'representante', 'contacto' ) ),
 		'carrec'       => 'agent immobiliari autoritzat',
 		'banc'         => $pick( array( 'banco', 'entidad_banc' ) ),
 		'iban'         => $pick( array( 'iban', 'fiscal_iban' ) ),
@@ -377,6 +377,7 @@ function axr_ag_xml( $s ) {
 /** Genera el .docx a partir del model de VIMICO (contractes/model-reserva.docx). Retorna el camí del fitxer temporal o WP_Error. */
 function axr_ag_contract_docx( array $v, array $int, $logo_url = '' ) {
 	if ( ! class_exists( 'ZipArchive' ) ) { return new WP_Error( 'zip', 'El servidor no té ZipArchive.' ); }
+	if ( ! function_exists( 'wp_tempnam' ) ) { require_once ABSPATH . 'wp-admin/includes/file.php'; }
 	$tpl = AXR_DIR . 'contractes/model-reserva.docx';
 	$tmp = wp_tempnam( 'contracte-reserva' );
 	if ( ! copy( $tpl, $tmp ) ) { return new WP_Error( 'tpl', 'No s\'ha pogut preparar el model.' ); }
